@@ -198,6 +198,23 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    /**
+     * @Description 获取UTC0时区时间
+     */
+    public static OrderTask getSystemTime() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_SYSTEM_TIME);
+        return task;
+    }
+
+    /**
+     * @Description 设置UTC0时区时间
+     */
+    public static OrderTask setSystemTime() {
+        ParamsTask task = new ParamsTask();
+        task.setSystemTime();
+        return task;
+    }
     public static OrderTask getButtonResetEnable() {
         ParamsTask task = new ParamsTask();
         task.getData(ParamsKeyEnum.KEY_BUTTON_RESET_ENABLE);
@@ -273,6 +290,12 @@ public class OrderTaskAssembler {
     public static OrderTask setLongPressEventClear() {
         ParamsTask task = new ParamsTask();
         task.setData(ParamsKeyEnum.KEY_LONG_PRESS_EVENT_CLEAR);
+        return task;
+    }
+
+    public static OrderTask setLongConnectionEventClear() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_LONG_CONNECTION_CLEAR);
         return task;
     }
 
@@ -411,6 +434,20 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    public static OrderTask getSlotVibrationNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot) {
+        ParamsTask task = new ParamsTask();
+        task.getSlotVibrationNotifyAlarmParams(slot);
+        return task;
+    }
+
+    public static OrderTask setSlotVibrationNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot,
+                                                        @IntRange(from = 1, to = 6000) int time,
+                                                        @IntRange(from = 1, to = 100) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setSlotVibrationNotifyAlarmParams(slot, time, interval);
+        return task;
+    }
+
     public static OrderTask getSlotBuzzerNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot) {
         ParamsTask task = new ParamsTask();
         task.getSlotBuzzerNotifyAlarmParams(slot);
@@ -435,6 +472,19 @@ public class OrderTaskAssembler {
                                                           @IntRange(from = 0, to = 100) int interval) {
         ParamsTask task = new ParamsTask();
         task.setRemoteLEDNotifyAlarmParams(time, interval);
+        return task;
+    }
+
+    public static OrderTask getRemoteVibrationNotifyAlarmParams() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_REMOTE_VIBRATION_NOTIFY_ALARM_PARAMS);
+        return task;
+    }
+
+    public static OrderTask setRemoteVibrationNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
+                                                                @IntRange(from = 1, to = 100) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setRemoteVibrationNotifyAlarmParams(time, interval);
         return task;
     }
 
@@ -479,6 +529,19 @@ public class OrderTaskAssembler {
                                                            @IntRange(from = 0, to = 100) int interval) {
         ParamsTask task = new ParamsTask();
         task.setDismissLEDNotifyAlarmParams(time, interval);
+        return task;
+    }
+
+    public static OrderTask getDismissVibrationNotifyAlarmParams() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_DISMISS_VIBRATION_NOTIFY_ALARM_PARAMS);
+        return task;
+    }
+
+    public static OrderTask setDismissVibrationNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
+                                                                 @IntRange(from = 1, to = 100) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setDismissVibrationNotifyAlarmParams(time, interval);
         return task;
     }
 

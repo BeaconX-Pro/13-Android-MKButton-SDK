@@ -23,6 +23,7 @@ final class MokoBleConfig extends MokoBleManager {
     private BluetoothGattCharacteristic singleTriggerCharacteristic;
     private BluetoothGattCharacteristic doubleTriggerCharacteristic;
     private BluetoothGattCharacteristic longTriggerCharacteristic;
+    private BluetoothGattCharacteristic longConnectionCharacteristic;
     private BluetoothGattCharacteristic accCharacteristic;
     private BluetoothGattCharacteristic passwordCharacteristic;
     private BluetoothGattCharacteristic clickEventCharacteristic;
@@ -43,6 +44,7 @@ final class MokoBleConfig extends MokoBleManager {
             singleTriggerCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_SINGLE_TRIGGER.getUuid());
             doubleTriggerCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_DOUBLE_TRIGGER.getUuid());
             longTriggerCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_LONG_TRIGGER.getUuid());
+            longConnectionCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_LONG_CONNECTION.getUuid());
             accCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_ACC.getUuid());
             passwordCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_PASSWORD.getUuid());
             clickEventCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_CLICK_EVENT.getUuid());
@@ -57,9 +59,9 @@ final class MokoBleConfig extends MokoBleManager {
     public void init() {
         requestMtu(247).with(((device, mtu) -> {
         })).then((device -> {
-            enableParamsNotify();
             enableDisconnectNotify();
             enablePasswordNotify();
+            enableParamsNotify();
         })).enqueue();
     }
 
@@ -213,5 +215,19 @@ final class MokoBleConfig extends MokoBleManager {
 
     public void disableClickEventNotify() {
         disableNotifications(clickEventCharacteristic).enqueue();
+    }
+
+    public void enableLongConnectionNotify() {
+        setNotificationCallback(longConnectionCharacteristic).with((device, data) -> {
+            final byte[] value = data.getValue();
+            XLog.e("onDataReceived");
+            XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
+            mMokoResponseCallback.onCharacteristicChanged(longConnectionCharacteristic, value);
+        });
+        enableNotifications(longConnectionCharacteristic).enqueue();
+    }
+
+    public void disableLongConnectionNotify() {
+        disableNotifications(longConnectionCharacteristic).enqueue();
     }
 }

@@ -58,7 +58,7 @@ public class Utils {
                 uri = IOUtils.insertDownloadFile(context, files[0]);
             } else {
                 if (BuildConfig.IS_LIBRARY) {
-                    uri = FileProvider.getUriForFile(context, "com.moko.bxp.button.fileprovider", files[0]);
+                    uri = FileProvider.getUriForFile(context, "com.moko.beaconxpro.fileprovider", files[0]);
                 } else {
                     uri = FileProvider.getUriForFile(context, "com.moko.bxp.button.d.fileprovider", files[0]);
                 }
@@ -69,19 +69,18 @@ public class Utils {
         } else {
             ArrayList<Uri> uris = new ArrayList<>();
             ArrayList<CharSequence> charSequences = new ArrayList<>();
-            for (int i = 0; i < files.length; i++) {
+            for (File file : files) {
+                Uri fileUri;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    Uri fileUri = IOUtils.insertDownloadFile(context, files[i]);
-                    uris.add(fileUri);
+                    fileUri = IOUtils.insertDownloadFile(context, file);
                 } else {
-                    Uri uri;
                     if (BuildConfig.IS_LIBRARY) {
-                        uri = FileProvider.getUriForFile(context, "com.moko.bxp.button.fileprovider", files[i]);
+                        fileUri = FileProvider.getUriForFile(context, "com.moko.beaconxpro.fileprovider", file);
                     } else {
-                        uri = FileProvider.getUriForFile(context, "com.moko.bxp.button.d.fileprovider", files[i]);
+                        fileUri = FileProvider.getUriForFile(context, "com.moko.bxp.button.d.fileprovider", file);
                     }
-                    uris.add(uri);
                 }
+                uris.add(fileUri);
                 charSequences.add(body);
             }
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);

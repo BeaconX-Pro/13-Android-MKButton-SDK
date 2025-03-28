@@ -36,7 +36,7 @@ import java.util.Arrays;
 
 import cn.carbswang.android.numberpickerview.library.NumberPickerView;
 
-public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener, NumberPickerView.OnValueChangeListener {
+public class AlarmModeConfigCRActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener, NumberPickerView.OnValueChangeListener {
 
     private DActivityAlarmModeConfigBinding mBind;
     public boolean isConfigError;
@@ -83,7 +83,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
         mBind.npvFrameType.setOnValueChangedListener(this);
 
 
-        String[] alarmNotifyTypeArray = getResources().getStringArray(R.array.alarm_notify_type_d);
+        String[] alarmNotifyTypeArray = getResources().getStringArray(R.array.alarm_notify_type_cr);
         mBind.npvNotifyType.setDisplayedValues(alarmNotifyTypeArray);
         mBind.npvNotifyType.setMinValue(0);
         mBind.npvNotifyType.setMaxValue(alarmNotifyTypeArray.length - 1);
@@ -147,6 +147,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             }
             orderTasks.add(OrderTaskAssembler.getSlotTriggerAlarmNotifyType(slotType));
             orderTasks.add(OrderTaskAssembler.getSlotLEDNotifyAlarmParams(slotType));
+            orderTasks.add(OrderTaskAssembler.getSlotVibrationNotifyAlarmParams(slotType));
             orderTasks.add(OrderTaskAssembler.getSlotBuzzerNotifyAlarmParams(slotType));
             DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }
@@ -161,7 +162,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             public void run() {
                 if (MokoConstants.ACTION_DISCONNECTED.equals(action)) {
                     // 设备断开，通知页面更新
-                    AlarmModeConfigActivity.this.finish();
+                    AlarmModeConfigCRActivity.this.finish();
                 }
             }
         });
@@ -205,6 +206,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
                                     case KEY_FRAME_TYPE:
                                     case KEY_SLOT_TRIGGER_PARAMS:
                                     case KEY_SLOT_LED_NOTIFY_ALARM_PARAMS:
+                                    case KEY_SLOT_VIBRATION_NOTIFY_ALARM_PARAMS:
                                     case KEY_SLOT_BUZZER_NOTIFY_ALARM_PARAMS:
                                         if (result == 0) {
                                             isConfigError = true;
@@ -215,7 +217,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
                                             isConfigError = true;
                                         }
                                         if (isConfigError) {
-                                            ToastUtils.showToast(AlarmModeConfigActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(AlarmModeConfigCRActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             ToastUtils.showToast(this, "Success");
                                         }
@@ -302,14 +304,18 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
                                         if (length == 2 && value[4] == slotType) {
                                             mNotifyType = value[5] & 0xFF;
                                             int type = mNotifyType;
-                                            if (mNotifyType == 3) type = mNotifyType - 1;
-                                            if (mNotifyType == 5) type = mNotifyType - 2;
                                             mBind.npvNotifyType.setValue(type);
-                                            if (mNotifyType == 1 || mNotifyType == 5) {
+                                            if (mNotifyType == 1 || mNotifyType == 4 || mNotifyType == 5) {
                                                 // LED/LED+Vibration/LED+Buzzer
                                                 mBind.clLedNotify.setVisibility(View.VISIBLE);
                                             } else {
                                                 mBind.clLedNotify.setVisibility(View.GONE);
+                                            }
+                                            if (mNotifyType == 2 || mNotifyType == 4) {
+                                                // Vibration/LED+Vibration
+                                                mBind.clVibrationNotify.setVisibility(View.VISIBLE);
+                                            } else {
+                                                mBind.clVibrationNotify.setVisibility(View.GONE);
                                             }
                                             if (mNotifyType == 3 || mNotifyType == 5) {
                                                 // Buzzer/LED+Buzzer
@@ -325,6 +331,14 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
                                             int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 7, 9));
                                             mBind.etBlinkingTime.setText(String.valueOf(time));
                                             mBind.etBlinkingInterval.setText(String.valueOf(interval));
+                                        }
+                                        break;
+                                    case KEY_SLOT_VIBRATION_NOTIFY_ALARM_PARAMS:
+                                        if (length == 5 && value[4] == slotType) {
+                                            int time = MokoUtils.toInt(Arrays.copyOfRange(value, 5, 7));
+                                            int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 7, 9));
+                                            mBind.etVibrationTime.setText(String.valueOf(time));
+                                            mBind.etVibrationInterval.setText(String.valueOf(interval));
                                         }
                                         break;
                                     case KEY_SLOT_BUZZER_NOTIFY_ALARM_PARAMS:
@@ -441,13 +455,21 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             }
         }
 
-        if (mNotifyType == 1 || mNotifyType == 5) {
+        if (mNotifyType == 1 || mNotifyType == 4 || mNotifyType == 5) {
             String ledTimeStr = mBind.etBlinkingTime.getText().toString();
             String ledIntervalStr = mBind.etBlinkingInterval.getText().toString();
             int ledTime = Integer.parseInt(ledTimeStr);
             int ledInterval = Integer.parseInt(ledIntervalStr);
             // LED/LED+Vibration/LED+Buzzer
             orderTasks.add(OrderTaskAssembler.setSlotLEDNotifyAlarmParams(slotType, ledTime, ledInterval));
+        }
+        if (mNotifyType == 2 || mNotifyType == 4) {
+            String vibrationTimeStr = mBind.etVibrationTime.getText().toString();
+            String vibrationIntervalStr = mBind.etVibrationInterval.getText().toString();
+            int vibrationTime = Integer.parseInt(vibrationTimeStr);
+            int vibrationInterval = Integer.parseInt(vibrationIntervalStr);
+            // Vibration/LED+Vibration
+            orderTasks.add(OrderTaskAssembler.setSlotVibrationNotifyAlarmParams(slotType, vibrationTime, vibrationInterval));
         }
         if (mNotifyType == 3 || mNotifyType == 5) {
             String buzzerTimeStr = mBind.etRingingTime.getText().toString();
@@ -505,9 +527,11 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             return true;
         String ledTimeStr = mBind.etBlinkingTime.getText().toString();
         String ledIntervalStr = mBind.etBlinkingInterval.getText().toString();
+        String vibrationTimeStr = mBind.etVibrationTime.getText().toString();
+        String vibrationIntervalStr = mBind.etVibrationInterval.getText().toString();
         String buzzerTimeStr = mBind.etRingingTime.getText().toString();
         String buzzerIntervalStr = mBind.etRingingInterval.getText().toString();
-        if (mNotifyType == 1 || mNotifyType == 5) {
+        if (mNotifyType == 1 || mNotifyType == 4 || mNotifyType == 5) {
             if (TextUtils.isEmpty(ledTimeStr) || TextUtils.isEmpty(ledIntervalStr)) {
                 return false;
             }
@@ -529,6 +553,17 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             if (buzzerInterval > 100)
                 return false;
         }
+        if (mNotifyType == 2 || mNotifyType == 4) {
+            if (TextUtils.isEmpty(vibrationTimeStr) || TextUtils.isEmpty(vibrationIntervalStr)) {
+                return false;
+            }
+            int vibrationTime = Integer.parseInt(vibrationTimeStr);
+            if (vibrationTime < 1 || vibrationTime > 6000)
+                return false;
+            int vibrationInterval = Integer.parseInt(vibrationIntervalStr);
+            if (vibrationInterval > 100)
+                return false;
+        }
         return true;
     }
 
@@ -542,13 +577,17 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
             mBind.llIBeaconAdvContent.setVisibility(mFrameType == 2 ? View.VISIBLE : View.GONE);
         } else if (picker.getId() == R.id.npv_notify_type) {
             mNotifyType = newVal;
-            if (newVal == 2) mNotifyType = newVal + 1;
-            if (newVal == 3) mNotifyType = newVal + 2;
-            if (mNotifyType == 1 || mNotifyType == 5) {
-                // LED /LED+Buzzer
+            if (mNotifyType == 1 || mNotifyType == 4 || mNotifyType == 5) {
+                // LED/LED+Vibration/LED+Buzzer
                 mBind.clLedNotify.setVisibility(View.VISIBLE);
             } else {
                 mBind.clLedNotify.setVisibility(View.GONE);
+            }
+            if (mNotifyType == 2 || mNotifyType == 4) {
+                // Vibration/LED+Vibration
+                mBind.clVibrationNotify.setVisibility(View.VISIBLE);
+            } else {
+                mBind.clVibrationNotify.setVisibility(View.GONE);
             }
             if (mNotifyType == 3 || mNotifyType == 5) {
                 // Buzzer/LED+Buzzer

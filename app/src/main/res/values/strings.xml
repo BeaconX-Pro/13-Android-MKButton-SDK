@@ -42,6 +42,14 @@
         <item>Buzzer</item>
         <item>LED+Buzzer</item>
     </string-array>
+    <string-array name="alarm_notify_type_cr">
+        <item>Silent</item>
+        <item>LED</item>
+        <item>Vibration</item>
+        <item>Buzzer</item>
+        <item>LED+Vibration</item>
+        <item>LED+Buzzer</item>
+    </string-array>
     <string-array name="frame_type_array">
         <item>Alarm info</item>
         <item>UID</item>

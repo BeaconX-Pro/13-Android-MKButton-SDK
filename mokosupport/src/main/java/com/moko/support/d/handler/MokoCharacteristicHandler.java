@@ -82,6 +82,10 @@ public class MokoCharacteristicHandler {
                 final BluetoothGattCharacteristic characteristic = service.getCharacteristic(OrderCHAR.CHAR_CLICK_EVENT.getUuid());
                 mCharacteristicMap.put(OrderCHAR.CHAR_CLICK_EVENT, characteristic);
             }
+            if (service.getCharacteristic(OrderCHAR.CHAR_LONG_CONNECTION.getUuid()) != null) {
+                final BluetoothGattCharacteristic characteristic = service.getCharacteristic(OrderCHAR.CHAR_LONG_CONNECTION.getUuid());
+                mCharacteristicMap.put(OrderCHAR.CHAR_LONG_CONNECTION, characteristic);
+            }
         }
         return mCharacteristicMap;
     }

@@ -74,10 +74,14 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
     private boolean isPasswordError;
 
     public static String PATH_LOGCAT;
-
+    // 0:V1
+    // 1:V2
     private int mFirmwareType;
+    // 0:-D
+    // 1:-CR
+    private int mSoftwareType;
 
-    private static final String REGEX = "^BXP-B(\\d)*-D$";
+    private static final String REGEX = "^BXP-B(\\d)*(-D|-CR)*$";
 
     private Pattern mPatter = Pattern.compile(REGEX);
 
@@ -90,13 +94,13 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             // 优先保存到SD卡中
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                PATH_LOGCAT = getExternalFilesDir(null).getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "MKButton" : "MKButtonD");
+                PATH_LOGCAT = getExternalFilesDir(null).getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "mokoBeaconXPro" : "MKButtonD");
             } else {
-                PATH_LOGCAT = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "MKButton" : "MKButtonD");
+                PATH_LOGCAT = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "mokoBeaconXPro" : "MKButtonD");
             }
         } else {
             // 如果SD卡不存在，就保存到本应用的目录下
-            PATH_LOGCAT = getFilesDir().getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "MKButton" : "MKButtonD");
+            PATH_LOGCAT = getFilesDir().getAbsolutePath() + File.separator + (BuildConfig.IS_LIBRARY ? "mokoBeaconXPro" : "MKButtonD");
         }
         DMokoSupport.getInstance().init(getApplicationContext());
         advInfoHashMap = new ConcurrentHashMap<>();
@@ -249,8 +253,11 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                         showDeviceTypeErrorDialog();
                                         return;
                                     }
+                                    if (softwareVersionStr.contains("CR"))
+                                        mSoftwareType = 1;
                                     Intent intent = new Intent(this, DeviceInfoActivity.class);
                                     intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+                                    intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
                                     startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
                                     break;
                             }

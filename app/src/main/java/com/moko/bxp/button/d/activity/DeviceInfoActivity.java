@@ -34,7 +34,7 @@ import com.moko.bxp.button.d.fragment.AlarmFragment;
 import com.moko.bxp.button.d.fragment.AlarmNewFragment;
 import com.moko.bxp.button.d.fragment.DeviceFragment;
 import com.moko.bxp.button.d.fragment.SettingFragment;
-import com.moko.bxp.button.d.service.DfuService;
+import com.moko.bxp.button.d.service.DfuServiceBtn;
 import com.moko.bxp.button.d.utils.FileUtils;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.support.d.DMokoSupport;
@@ -73,6 +73,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     private int mDisconnectType;
     public boolean isConfigError;
     public int mFirmwareType;
+    public int mSoftwareType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         mBind = DActivityDeviceInfoBinding.inflate(getLayoutInflater());
         setContentView(mBind.getRoot());
         mFirmwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, 0);
+        mSoftwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, 0);
         fragmentManager = getFragmentManager();
         initFragment();
         mBind.rgOptions.setOnCheckedChangeListener(this);
@@ -470,11 +472,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                     final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac)
                             .setDeviceName(mDeviceName)
                             .setKeepBond(false)
-                            .setForeground(false)
-                            .disableMtuRequest()
                             .setDisableNotification(true);
                     starter.setZip(null, firmwareFilePath);
-                    starter.start(this, DfuService.class);
+                    starter.start(this, DfuServiceBtn.class);
                     showDFUProgressDialog("Waiting...");
                 } else {
                     Toast.makeText(this, "file is not exists!", Toast.LENGTH_SHORT).show();
@@ -667,7 +667,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onSinglePressMode(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmModeConfigActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
@@ -676,7 +677,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onDoublePressMode(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmModeConfigActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 1);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
@@ -685,7 +687,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onLongPressMode(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmModeConfigActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 2);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
@@ -694,7 +697,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onAbnormalInactivityMode(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmModeConfigActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 3);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
@@ -710,7 +714,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onAlarmTypeSetting(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmNotifyTypeActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmNotifyTypeActivity.class : AlarmNotifyTypeCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 4);
         startActivity(intent);
     }
@@ -718,7 +723,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onAlarmEvent(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, AlarmEventActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? AlarmEventActivity.class : AlarmEventCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
     }
@@ -726,7 +732,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onDismissAlarmConfig(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, DismissAlarmNotifyTypeActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? DismissAlarmNotifyTypeActivity.class : DismissAlarmNotifyTypeCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
     }
@@ -734,7 +741,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public void onRemoteReminder(View view) {
         if (isWindowLocked())
             return;
-        Intent intent = new Intent(this, RemoteReminderActivity.class);
+        Intent intent = new Intent(this, mSoftwareType == 0
+                ? RemoteReminderActivity.class : RemoteReminderCRActivity.class);
         startActivity(intent);
     }
 
@@ -868,8 +876,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 ToastUtils.showToast(DeviceInfoActivity.this, "Error:DFU Failed");
                 DMokoSupport.getInstance().disConnectBle();
                 final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(DeviceInfoActivity.this);
-                final Intent abortAction = new Intent(DfuService.BROADCAST_ACTION);
-                abortAction.putExtra(DfuService.EXTRA_ACTION, DfuService.ACTION_ABORT);
+                final Intent abortAction = new Intent(DfuServiceBtn.BROADCAST_ACTION);
+                abortAction.putExtra(DfuServiceBtn.EXTRA_ACTION, DfuServiceBtn.ACTION_ABORT);
                 manager.sendBroadcast(abortAction);
             }
         }

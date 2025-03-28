@@ -7,17 +7,15 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.bxp.button.d.AppConstants;
 import com.moko.bxp.button.d.R;
 import com.moko.bxp.button.d.adapter.ExportDataListAdapter;
 import com.moko.bxp.button.d.databinding.DActivityExportDataBinding;
+import com.moko.bxp.button.d.databinding.DActivityExportDataLongConnectionBinding;
 import com.moko.bxp.button.d.dialog.LoadingMessageDialog;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.bxp.button.d.utils.Utils;
@@ -40,19 +38,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
-public class ExportDataActivity extends BaseActivity {
+import androidx.recyclerview.widget.LinearLayoutManager;
 
-    private static final String EXPORT_FILE_SINGLE = "Single_press_trigger_event.txt";
-    private static final String EXPORT_FILE_DOUBLE = "Double_press_trigger_event.txt";
-    private static final String EXPORT_FILE_LONG = "Long_press_trigger_event.txt";
-    private static final String EXPORT_FILE_SINGLE_TITLE = "Single_press_trigger_event";
-    private static final String EXPORT_FILE_DOUBLE_TITLE = "Double_press_trigger_event";
-    private static final String EXPORT_FILE_LONG_TITLE = "Long_press_trigger_event";
+public class ExportLongConnectionDataActivity extends BaseActivity {
+
+    private static final String EXPORT_FILE = "Long_connection_event.txt";
+    private static final String EXPORT_FILE_TITLE = "Long_connection_event";
 
     private static String PATH_LOGCAT;
-    private DActivityExportDataBinding mBind;
+    private DActivityExportDataLongConnectionBinding mBind;
 
     private StringBuilder storeString;
     private ArrayList<ExportData> exportDatas;
@@ -63,40 +60,17 @@ public class ExportDataActivity extends BaseActivity {
     private boolean mIsShown;
     private String exportTitle;
 
-
-    public int slotType;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBind = DActivityExportDataBinding.inflate(getLayoutInflater());
+        mBind = DActivityExportDataLongConnectionBinding.inflate(getLayoutInflater());
         setContentView(mBind.getRoot());
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            slotType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
-        }
-        switch (slotType) {
-            case 0:
-                mBind.tvTitle.setText("Single press event");
-                exportDatas = DMokoSupport.getInstance().exportSingleEvents;
-                storeString = DMokoSupport.getInstance().storeSingleEventString;
-                PATH_LOGCAT = DMainActivity.PATH_LOGCAT + File.separator + EXPORT_FILE_SINGLE;
-                exportTitle = EXPORT_FILE_SINGLE_TITLE;
-                break;
-            case 1:
-                mBind.tvTitle.setText("Double press event");
-                exportDatas = DMokoSupport.getInstance().exportDoubleEvents;
-                storeString = DMokoSupport.getInstance().storeDoubleEventString;
-                PATH_LOGCAT = DMainActivity.PATH_LOGCAT + File.separator + EXPORT_FILE_DOUBLE;
-                exportTitle = EXPORT_FILE_DOUBLE_TITLE;
-                break;
-            case 2:
-                mBind.tvTitle.setText("Long press event");
-                exportDatas = DMokoSupport.getInstance().exportLongEvents;
-                storeString = DMokoSupport.getInstance().storeLongEventString;
-                PATH_LOGCAT = DMainActivity.PATH_LOGCAT + File.separator + EXPORT_FILE_LONG;
-                exportTitle = EXPORT_FILE_LONG_TITLE;
-                break;
-        }
+
+        exportDatas = DMokoSupport.getInstance().exportSingleEvents;
+        storeString = DMokoSupport.getInstance().storeSingleEventString;
+        PATH_LOGCAT = DMainActivity.PATH_LOGCAT + File.separator + EXPORT_FILE;
+        exportTitle = EXPORT_FILE_TITLE;
+
         if (exportDatas != null && exportDatas.size() > 0 && storeString != null) {
             mBind.tvExport.setEnabled(true);
         } else {
@@ -135,17 +109,14 @@ public class ExportDataActivity extends BaseActivity {
                 int responseType = response.responseType;
                 byte[] value = response.responseValue;
                 switch (orderCHAR) {
-                    // eb0201090000017f87a9be8b
-                    case CHAR_SINGLE_TRIGGER:
-                    case CHAR_DOUBLE_TRIGGER:
-                    case CHAR_LONG_TRIGGER:
+                    case CHAR_LONG_CONNECTION:
                         int header = value[0] & 0xFF;// 0xEB
                         int flag = value[1] & 0xFF;// read or write
                         int cmd = value[2] & 0xFF;
                         if (header != 0xEB)
                             return;
                         int length = value[3] & 0xFF;
-                        if (flag == 0x02 && cmd == (slotType + 1) && length == 0x09) {
+                        if (flag == 0x02 && cmd == 0x07 && length == 0x09) {
                             if (!mIsShown) {
                                 mIsShown = true;
                                 mBind.tvExport.setEnabled(true);
@@ -161,17 +132,8 @@ public class ExportDataActivity extends BaseActivity {
 
                             String timestampStr = sdf.format(calendar.getTime());
                             exportData.timestamp = timestampStr;
-                            switch (slotType) {
-                                case 0:
-                                    exportData.triggerMode = "Single press mode";
-                                    break;
-                                case 1:
-                                    exportData.triggerMode = "Double press mode";
-                                    break;
-                                case 2:
-                                    exportData.triggerMode = "Long press mode";
-                                    break;
-                            }
+                            exportData.triggerMode = String.valueOf(value[12] & 0xFF);
+
                             exportDatas.add(0, exportData);
                             storeString.insert(0, String.format("%s  %s\n", timestampStr, exportData.triggerMode));
                         }
@@ -189,47 +151,30 @@ public class ExportDataActivity extends BaseActivity {
                 OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
                 int responseType = response.responseType;
                 byte[] value = response.responseValue;
-                switch (orderCHAR) {
-                    case CHAR_PARAMS:
-                        if (value.length > 4) {
-                            int header = value[0] & 0xFF;// 0xEB
-                            int flag = value[1] & 0xFF;// read or write
-                            int cmd = value[2] & 0xFF;
-                            if (header != 0xEB)
-                                return;
-                            ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            int length = value[3] & 0xFF;
-                            if (flag == 0x01 && length == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_SINGLE_PRESS_EVENT_CLEAR:
-                                    case KEY_DOUBLE_PRESS_EVENT_CLEAR:
-                                    case KEY_LONG_PRESS_EVENT_CLEAR:
-                                        if (result == 0) {
-                                            ToastUtils.showToast(ExportDataActivity.this, "Opps！Save failed. Please check the input characters and try again.");
-                                        } else {
-                                            ToastUtils.showToast(ExportDataActivity.this, "Success！");
-                                        }
-                                        break;
-//                                case KEY_LONG_CONNECTION_CLEAR:
-//                                    if (result == 0) {
-//                                        ToastUtils.showToast(ExportDataActivity.this, "Opps！Save failed. Please check the input characters and try again.");
-//                                    } else {
-//                                        ToastUtils.showToast(ExportDataActivity.this, "Success！");
-//                                        if (DMokoSupport.getInstance().exportLongConnectionEvents != null) {
-//                                            DMokoSupport.getInstance().exportLongConnectionEvents.clear();
-//                                            DMokoSupport.getInstance().storeLongConnectionEventString = null;
-//                                        }
-//                                    }
-//                                    break;
+                if (Objects.requireNonNull(orderCHAR) == OrderCHAR.CHAR_PARAMS) {
+                    if (value.length > 4) {
+                        int header = value[0] & 0xFF;// 0xEB
+                        int flag = value[1] & 0xFF;// read or write
+                        int cmd = value[2] & 0xFF;
+                        if (header != 0xEB)
+                            return;
+                        ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        int length = value[3] & 0xFF;
+                        if (flag == 0x01 && length == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            if (configKeyEnum == ParamsKeyEnum.KEY_LONG_CONNECTION_CLEAR) {
+                                if (result == 0) {
+                                    ToastUtils.showToast(ExportLongConnectionDataActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                } else {
+                                    ToastUtils.showToast(ExportLongConnectionDataActivity.this, "Success！");
                                 }
                             }
                         }
-                        break;
+                    }
                 }
             });
         }
@@ -256,21 +201,9 @@ public class ExportDataActivity extends BaseActivity {
 
     private void back() {
         if (mIsSync) {
-            if (slotType == 0) {
-                DMokoSupport.getInstance().disableSingleTriggerNotify();
-                DMokoSupport.getInstance().exportSingleEvents = exportDatas;
-                DMokoSupport.getInstance().storeSingleEventString = storeString;
-            }
-            if (slotType == 1) {
-                DMokoSupport.getInstance().disableDoubleTriggerNotify();
-                DMokoSupport.getInstance().exportDoubleEvents = exportDatas;
-                DMokoSupport.getInstance().storeDoubleEventString = storeString;
-            }
-            if (slotType == 2) {
-                DMokoSupport.getInstance().disableLongTriggerNotify();
-                DMokoSupport.getInstance().exportLongEvents = exportDatas;
-                DMokoSupport.getInstance().storeLongEventString = storeString;
-            }
+            DMokoSupport.getInstance().disableLongConnectionNotify();
+            DMokoSupport.getInstance().exportLongConnectionEvents = exportDatas;
+            DMokoSupport.getInstance().storeLongConnectionEventString = storeString;
         }
         finish();
     }
@@ -288,28 +221,13 @@ public class ExportDataActivity extends BaseActivity {
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
             mBind.ivSync.startAnimation(animation);
             mBind.tvSync.setText("Stop");
-            if (slotType == 0) {
-                DMokoSupport.getInstance().enableSingleTriggerNotify();
-            }
-            if (slotType == 1) {
-                DMokoSupport.getInstance().enableDoubleTriggerNotify();
-            }
-            if (slotType == 2) {
-                DMokoSupport.getInstance().enableLongTriggerNotify();
-            }
+            DMokoSupport.getInstance().enableLongConnectionNotify();
+
         } else {
             mIsSync = false;
             mBind.ivSync.clearAnimation();
             mBind.tvSync.setText("Sync");
-            if (slotType == 0) {
-                DMokoSupport.getInstance().disableSingleTriggerNotify();
-            }
-            if (slotType == 1) {
-                DMokoSupport.getInstance().disableDoubleTriggerNotify();
-            }
-            if (slotType == 2) {
-                DMokoSupport.getInstance().disableLongTriggerNotify();
-            }
+            DMokoSupport.getInstance().disableLongConnectionNotify();
         }
     }
 
@@ -321,17 +239,7 @@ public class ExportDataActivity extends BaseActivity {
         exportDatas.clear();
         adapter.replaceData(exportDatas);
         showSyncingProgressDialog();
-        switch (slotType) {
-            case 0:
-                DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.setSinglePressEventClear());
-                break;
-            case 1:
-                DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.setDoublePressEventClear());
-                break;
-            case 2:
-                DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.setLongPressEventClear());
-                break;
-        }
+        DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.setLongConnectionEventClear());
     }
 
     public void onExport(View view) {
@@ -347,7 +255,7 @@ public class ExportDataActivity extends BaseActivity {
                 File file = getTrackedFile();
                 // 发送邮件
                 String address = "Development@mokotechnology.com";
-                Utils.sendEmail(ExportDataActivity.this, address, exportTitle, exportTitle, "Choose Email Client", file);
+                Utils.sendEmail(ExportLongConnectionDataActivity.this, address, exportTitle, exportTitle, "Choose Email Client", file);
             }
         }, 500);
     }

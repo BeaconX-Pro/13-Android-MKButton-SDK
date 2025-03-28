@@ -27,7 +27,7 @@ public class BaseApplication extends Application {
     private static final String TAG = "MKButtonD";
     private static final String LOG_FILE = "MKButtonD.txt";
     private static final String LOG_FOLDER = "MKButtonD";
-    public static String PATH_LOGCAT;
+    private static String PATH_LOGCAT;
 
     @Override
     public void onCreate() {

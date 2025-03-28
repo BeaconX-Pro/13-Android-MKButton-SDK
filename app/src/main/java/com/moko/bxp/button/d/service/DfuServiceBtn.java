@@ -25,7 +25,8 @@ import android.app.Activity;
 
 import no.nordicsemi.android.dfu.DfuBaseService;
 
-public class DfuService extends DfuBaseService {
+
+public class DfuServiceBtn extends DfuBaseService {
 
     @Override
     protected Class<? extends Activity> getNotificationTarget() {
