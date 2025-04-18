@@ -18,7 +18,7 @@ import com.moko.bxp.button.d.AppConstants;
 import com.moko.bxp.button.d.R;
 import com.moko.bxp.button.d.adapter.ExportDataListAdapter;
 import com.moko.bxp.button.d.databinding.DActivityExportDataBinding;
-import com.moko.bxp.button.d.dialog.LoadingMessageDialog;
+import com.moko.lib.bxpui.dialog.LoadingMessageDialog;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.bxp.button.d.utils.Utils;
 import com.moko.support.d.DMokoSupport;

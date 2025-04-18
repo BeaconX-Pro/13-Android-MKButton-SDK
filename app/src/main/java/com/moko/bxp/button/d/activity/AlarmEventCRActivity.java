@@ -12,7 +12,7 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.bxp.button.d.AppConstants;
 import com.moko.bxp.button.d.databinding.DActivityAlarmEventCrBinding;
-import com.moko.bxp.button.d.dialog.LoadingMessageDialog;
+import com.moko.lib.bxpui.dialog.LoadingMessageDialog;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.bxp.button.d.utils.Utils;
 import com.moko.support.d.DMokoSupport;

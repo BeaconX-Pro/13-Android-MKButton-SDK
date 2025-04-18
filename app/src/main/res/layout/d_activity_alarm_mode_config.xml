@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:clickable="true"
-            android:drawableLeft="@drawable/back"
+            android:drawableLeft="@drawable/ic_back"
             android:drawablePadding="6dp"
             android:gravity="center_vertical"
             android:onClick="onBack"
@@ -44,7 +44,7 @@
             android:onClick="onSave"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
-            android:src="@drawable/save" />
+            android:src="@drawable/ic_save" />
     </RelativeLayout>
 
     <ScrollView
@@ -67,7 +67,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_adv"
+                    android:drawableLeft="@drawable/ic_slot_adv_enable"
                     android:drawablePadding="10dp"
                     android:gravity="center"
                     android:text="SLOT advertisement"
@@ -103,7 +103,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:drawableLeft="@drawable/frame_type"
+                        android:drawableLeft="@drawable/ic_slot_frame_type"
                         android:drawablePadding="10dp"
                         android:gravity="center_vertical"
                         android:text="Frame type"
@@ -141,7 +141,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/adv_content"
+                        android:drawableLeft="@drawable/ic_slot_adv"
                         android:drawablePadding="10dp"
                         android:gravity="center"
                         android:text="Adv content"
@@ -252,7 +252,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/adv_content"
+                        android:drawableLeft="@drawable/ic_slot_adv"
                         android:drawablePadding="10dp"
                         android:gravity="center"
                         android:text="Adv content"
@@ -342,7 +342,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/ic_params"
+                        android:drawableLeft="@drawable/ic_slot_adv"
                         android:drawablePadding="10dp"
                         android:gravity="center"
                         android:text="Parameters"
@@ -425,7 +425,7 @@
 
                         <SeekBar
                             android:id="@+id/sb_adv_range_data"
-                            style="@style/CustomSeekBarStyle"
+                            style="@style/CustomSeekbarStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/adv_range_data"
@@ -475,7 +475,7 @@
 
                         <SeekBar
                             android:id="@+id/sb_tx_power"
-                            style="@style/CustomSeekBarStyle"
+                            style="@style/CustomSeekbarStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/tx_power"
@@ -516,7 +516,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableLeft="@drawable/ic_alarm_mode"
+                            android:drawableLeft="@drawable/ic_slot_alarm_mode"
                             android:drawablePadding="10dp"
                             android:gravity="center"
                             android:text="Alarm mode"
@@ -721,7 +721,7 @@
 
                             <SeekBar
                                 android:id="@+id/sb_trigger_tx_power"
-                                style="@style/CustomSeekBarStyle"
+                                style="@style/CustomSeekbarStyle"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_below="@id/trigger_tx_power"
@@ -769,7 +769,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginRight="10dp"
-                                android:src="@drawable/arrow_right" />
+                                android:src="@drawable/ic_arrow_right" />
                         </LinearLayout>
 
                         <LinearLayout
