@@ -57,12 +57,12 @@ final class MokoBleConfig extends MokoBleManager {
 
     @Override
     public void init() {
-//        requestMtu(247).with(((device, mtu) -> {
-//        })).then((device -> {
-        enableDisconnectNotify();
-        enablePasswordNotify();
-        enableParamsNotify();
-//        })).enqueue();
+        requestMtu(247).with(((device, mtu) -> {
+        })).then((device -> {
+            enableDisconnectNotify();
+            enablePasswordNotify();
+            enableParamsNotify();
+        })).enqueue();
     }
 
     @Override

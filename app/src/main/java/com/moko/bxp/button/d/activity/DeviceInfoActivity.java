@@ -98,9 +98,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         if (mFirmwareType == 1) {
             DMokoSupport.getInstance().enableClickEventNotify();
         }
+        showSyncingProgressDialog();
         mBind.tvTitle.postDelayed(() -> {
             DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getSensorType());
-        }, 500);
+        }, 200);
 //        getAlarmSwitch();
     }
 
