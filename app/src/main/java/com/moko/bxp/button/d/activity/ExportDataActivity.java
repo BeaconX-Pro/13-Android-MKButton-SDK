@@ -7,20 +7,17 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.bxp.button.d.AppConstants;
 import com.moko.bxp.button.d.R;
 import com.moko.bxp.button.d.adapter.ExportDataListAdapter;
 import com.moko.bxp.button.d.databinding.DActivityExportDataBinding;
-import com.moko.lib.bxpui.dialog.LoadingMessageDialog;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.bxp.button.d.utils.Utils;
+import com.moko.lib.bxpui.dialog.LoadingMessageDialog;
 import com.moko.support.d.DMokoSupport;
 import com.moko.support.d.OrderTaskAssembler;
 import com.moko.support.d.entity.ExportData;
@@ -41,6 +38,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class ExportDataActivity extends BaseActivity {
 

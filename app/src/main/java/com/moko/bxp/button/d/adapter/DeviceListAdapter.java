@@ -14,8 +14,6 @@ import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.bxp.button.d.R;
 import com.moko.bxp.button.d.entity.AdvInfo;
 
-import java.util.Iterator;
-
 public class DeviceListAdapter extends BaseQuickAdapter<AdvInfo, BaseViewHolder> {
     public DeviceListAdapter() {
         super(R.layout.d_list_item_device);
