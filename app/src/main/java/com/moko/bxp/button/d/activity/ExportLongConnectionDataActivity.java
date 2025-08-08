@@ -65,17 +65,10 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
         mBind = DActivityExportDataLongConnectionBinding.inflate(getLayoutInflater());
         setContentView(mBind.getRoot());
 
-        exportDatas = DMokoSupport.getInstance().exportSingleEvents;
-        storeString = DMokoSupport.getInstance().storeSingleEventString;
         PATH_LOGCAT = DMainActivity.PATH_LOGCAT + File.separator + EXPORT_FILE;
         exportTitle = EXPORT_FILE_TITLE;
-
-        if (exportDatas != null && exportDatas.size() > 0 && storeString != null) {
-            mBind.tvExport.setEnabled(true);
-        } else {
-            exportDatas = new ArrayList<>();
-            storeString = new StringBuilder();
-        }
+        exportDatas = new ArrayList<>();
+        storeString = new StringBuilder();
         adapter = new ExportDataListAdapter();
         adapter.openLoadAnimation();
         adapter.replaceData(exportDatas);
@@ -112,8 +105,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
                         int header = value[0] & 0xFF;// 0xEB
                         int flag = value[1] & 0xFF;// read or write
                         int cmd = value[2] & 0xFF;
-                        if (header != 0xEB)
-                            return;
+                        if (header != 0xEB) return;
                         int length = value[3] & 0xFF;
                         if (flag == 0x02 && cmd == 0x07 && length == 0x09) {
                             if (!mIsShown) {
@@ -155,8 +147,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
                         int header = value[0] & 0xFF;// 0xEB
                         int flag = value[1] & 0xFF;// read or write
                         int cmd = value[2] & 0xFF;
-                        if (header != 0xEB)
-                            return;
+                        if (header != 0xEB) return;
                         ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
                         if (configKeyEnum == null) {
                             return;
@@ -194,15 +185,12 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
     }
 
     public void dismissSyncProgressDialog() {
-        if (mLoadingMessageDialog != null)
-            mLoadingMessageDialog.dismissAllowingStateLoss();
+        if (mLoadingMessageDialog != null) mLoadingMessageDialog.dismissAllowingStateLoss();
     }
 
     private void back() {
         if (mIsSync) {
             DMokoSupport.getInstance().disableLongConnectionNotify();
-            DMokoSupport.getInstance().exportLongConnectionEvents = exportDatas;
-            DMokoSupport.getInstance().storeLongConnectionEventString = storeString;
         }
         finish();
     }
@@ -213,10 +201,12 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
     }
 
     public void onSync(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         if (!mIsSync) {
             mIsSync = true;
+            exportDatas.clear();
+            storeString = new StringBuilder();
+            adapter.replaceData(exportDatas);
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
             mBind.ivSync.startAnimation(animation);
             mBind.tvSync.setText("Stop");
@@ -231,8 +221,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
     }
 
     public void onEmpty(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         storeString = new StringBuilder();
         mBind.tvExport.setEnabled(false);
         exportDatas.clear();
@@ -242,8 +231,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
     }
 
     public void onExport(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         showSyncingProgressDialog();
         writeTrackedFile("");
         mBind.tvExport.postDelayed(() -> {

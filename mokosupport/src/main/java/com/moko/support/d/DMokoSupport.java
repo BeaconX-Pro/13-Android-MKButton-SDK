@@ -224,13 +224,4 @@ public class DMokoSupport extends MokoBleLib {
         if (mBleConfig != null)
             mBleConfig.disableLongConnectionNotify();
     }
-
-    public ArrayList<ExportData> exportSingleEvents;
-    public StringBuilder storeSingleEventString;
-    public ArrayList<ExportData> exportDoubleEvents;
-    public StringBuilder storeDoubleEventString;
-    public ArrayList<ExportData> exportLongEvents;
-    public StringBuilder storeLongEventString;
-    public ArrayList<ExportData> exportLongConnectionEvents;
-    public StringBuilder storeLongConnectionEventString;
 }

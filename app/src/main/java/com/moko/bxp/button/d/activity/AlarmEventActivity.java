@@ -99,10 +99,6 @@ public class AlarmEventActivity extends BaseActivity {
                                         } else {
                                             ToastUtils.showToast(AlarmEventActivity.this, "Success！");
                                             mBind.tvSinglePressEventCount.setText("0");
-                                            if (DMokoSupport.getInstance().exportSingleEvents != null) {
-                                                DMokoSupport.getInstance().exportSingleEvents.clear();
-                                                DMokoSupport.getInstance().storeSingleEventString = null;
-                                            }
                                         }
                                         break;
                                     case KEY_DOUBLE_PRESS_EVENT_CLEAR:
@@ -111,10 +107,6 @@ public class AlarmEventActivity extends BaseActivity {
                                         } else {
                                             ToastUtils.showToast(AlarmEventActivity.this, "Success！");
                                             mBind.tvDoublePressEventCount.setText("0");
-                                            if (DMokoSupport.getInstance().exportDoubleEvents != null) {
-                                                DMokoSupport.getInstance().exportDoubleEvents.clear();
-                                                DMokoSupport.getInstance().storeDoubleEventString = null;
-                                            }
                                         }
                                         break;
                                     case KEY_LONG_PRESS_EVENT_CLEAR:
@@ -123,10 +115,6 @@ public class AlarmEventActivity extends BaseActivity {
                                         } else {
                                             ToastUtils.showToast(AlarmEventActivity.this, "Success！");
                                             mBind.tvLongPressEventCount.setText("0");
-                                            if (DMokoSupport.getInstance().exportLongEvents != null) {
-                                                DMokoSupport.getInstance().exportLongEvents.clear();
-                                                DMokoSupport.getInstance().storeLongEventString = null;
-                                            }
                                         }
                                         break;
                                 }

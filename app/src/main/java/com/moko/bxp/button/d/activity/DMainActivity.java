@@ -81,9 +81,9 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
     // 1:-CR
     private int mSoftwareType;
 
-    private static final String REGEX = "^BXP-B(\\d)*(-D|-CR)*$";
+    private static final String REGEX = "^BXP-B(\\d)*(-D|-CR)*\\S+";
 
-    private Pattern mPatter = Pattern.compile(REGEX);
+    private Pattern mPattern = Pattern.compile(REGEX);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,7 +213,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                 case CHAR_SOFTWARE_REVISION:
                     String softwareVersion = new String(value).trim();
                     dismissLoadingMessageDialog();
-                    Matcher matcher = mPatter.matcher(softwareVersion);
+                    Matcher matcher = mPattern.matcher(softwareVersion);
                     if (!matcher.matches()) {
                         showDeviceTypeErrorDialog();
                         return;
@@ -248,7 +248,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     String softwareVersionStr = new String(rawDataBytes).trim();
                                     dismissLoadingProgressDialog();
                                     dismissLoadingMessageDialog();
-                                    Matcher m = mPatter.matcher(softwareVersionStr);
+                                    Matcher m = mPattern.matcher(softwareVersionStr);
                                     if (!m.matches()) {
                                         showDeviceTypeErrorDialog();
                                         return;

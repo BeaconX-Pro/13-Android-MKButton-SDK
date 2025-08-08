@@ -74,6 +74,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public boolean isConfigError;
     public int mFirmwareType;
     public int mSoftwareType;
+    public boolean mIsOpenClickEventNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,9 +96,6 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             // 蓝牙未打开，开启蓝牙
             DMokoSupport.getInstance().enableBluetooth();
         }
-        if (mFirmwareType == 1) {
-            DMokoSupport.getInstance().enableClickEventNotify();
-        }
         showSyncingProgressDialog();
         mBind.tvTitle.postDelayed(() -> {
             DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getSensorType());
@@ -111,23 +109,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         final String action = event.getAction();
         runOnUiThread(() -> {
             if (MokoConstants.ACTION_DISCONNECTED.equals(action)) {
-                if (DMokoSupport.getInstance().exportSingleEvents != null) {
-                    DMokoSupport.getInstance().exportSingleEvents.clear();
-                    DMokoSupport.getInstance().storeSingleEventString = null;
-                }
-                if (DMokoSupport.getInstance().exportDoubleEvents != null) {
-                    DMokoSupport.getInstance().exportDoubleEvents.clear();
-                    DMokoSupport.getInstance().storeDoubleEventString = null;
-                }
-                if (DMokoSupport.getInstance().exportLongEvents != null) {
-                    DMokoSupport.getInstance().exportLongEvents.clear();
-                    DMokoSupport.getInstance().storeLongEventString = null;
-                }
                 // 设备断开，通知页面更新
-                if (mIsClose)
-                    return;
-                if (mDisconnectType > 0)
-                    return;
+                if (mIsClose) return;
+                if (mDisconnectType > 0) return;
                 if (DMokoSupport.getInstance().isBluetoothOpen()) {
                     if (isUpgrading) {
                         mBind.tvTitle.postDelayed(() -> {
@@ -233,8 +217,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                             int header = value[0] & 0xFF;// 0xEB
                             int flag = value[1] & 0xFF;// read or write
                             int cmd = value[2] & 0xFF;
-                            if (header != 0xEB)
-                                return;
+                            if (header != 0xEB) return;
                             ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
                             if (configKeyEnum == null) {
                                 return;
@@ -272,8 +255,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                             int header = value[0] & 0xFF;// 0xEB
                             int flag = value[1] & 0xFF;// read or write
                             int cmd = value[2] & 0xFF;
-                            if (header != 0xEB)
-                                return;
+                            if (header != 0xEB) return;
                             ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
                             if (configKeyEnum == null) {
                                 return;
@@ -329,6 +311,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                                     alarmNewFragment.setLongPressModeSwitch(slotEnable);
                                                 } else if (slot == 3) {
                                                     alarmNewFragment.setAbnormalInactivityModeSwitch(slotEnable);
+                                                    if (!mIsOpenClickEventNotify) {
+                                                        mIsOpenClickEventNotify = true;
+                                                        DMokoSupport.getInstance().enableClickEventNotify();
+                                                    }
                                                 }
                                             } else {
                                                 if (slot == 0) {
@@ -470,10 +456,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 }
                 final File firmwareFile = new File(firmwareFilePath);
                 if (firmwareFile.exists()) {
-                    final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac)
-                            .setDeviceName(mDeviceName)
-                            .setKeepBond(false)
-                            .setDisableNotification(true);
+                    final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac).setDeviceName(mDeviceName).setKeepBond(false).setDisableNotification(true);
                     starter.setZip(null, firmwareFilePath);
                     starter.start(this, DfuServiceBtn.class);
                     showDFUProgressDialog("Waiting...");
@@ -485,8 +468,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         if (requestCode == AppConstants.REQUEST_CODE_QUICK_SWITCH) {
             if (resultCode == RESULT_OK) {
                 boolean enablePasswordVerify = data.getBooleanExtra(AppConstants.EXTRA_KEY_PASSWORD_VERIFICATION, false);
-                if (enablePasswordVerify)
-                    deviceFragment.setResetShown();
+                if (enablePasswordVerify) deviceFragment.setResetShown();
             }
         }
         if (requestCode == AppConstants.REQUEST_CODE_ALARM_MODE) {
@@ -495,14 +477,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 showSyncingProgressDialog();
                 mBind.ivSave.postDelayed(() -> {
                     ArrayList<OrderTask> orderTasks = new ArrayList<>();
-                    if (slotType == 0)
-                        orderTasks.add(OrderTaskAssembler.getSlotParams(0));
-                    else if (slotType == 1)
-                        orderTasks.add(OrderTaskAssembler.getSlotParams(1));
-                    else if (slotType == 2)
-                        orderTasks.add(OrderTaskAssembler.getSlotParams(2));
-                    else if (slotType == 3)
-                        orderTasks.add(OrderTaskAssembler.getSlotParams(3));
+                    if (slotType == 0) orderTasks.add(OrderTaskAssembler.getSlotParams(0));
+                    else if (slotType == 1) orderTasks.add(OrderTaskAssembler.getSlotParams(1));
+                    else if (slotType == 2) orderTasks.add(OrderTaskAssembler.getSlotParams(2));
+                    else if (slotType == 3) orderTasks.add(OrderTaskAssembler.getSlotParams(3));
                     DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
                 }, 100);
             }
@@ -530,8 +508,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     public void dismissSyncProgressDialog() {
-        if (mLoadingMessageDialog != null)
-            mLoadingMessageDialog.dismissAllowingStateLoss();
+        if (mLoadingMessageDialog != null) mLoadingMessageDialog.dismissAllowingStateLoss();
     }
 
     private void back() {
@@ -549,24 +526,13 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         alarmNewFragment = AlarmNewFragment.newInstance();
         settingFragment = SettingFragment.newInstance();
         deviceFragment = DeviceFragment.newInstance();
-        fragmentManager.beginTransaction()
-                .add(R.id.frame_container, mFirmwareType == 1 ? alarmNewFragment : alarmFragment)
-                .add(R.id.frame_container, settingFragment)
-                .add(R.id.frame_container, deviceFragment)
-                .show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment)
-                .hide(settingFragment)
-                .hide(deviceFragment)
-                .commit();
+        fragmentManager.beginTransaction().add(R.id.frame_container, mFirmwareType == 1 ? alarmNewFragment : alarmFragment).add(R.id.frame_container, settingFragment).add(R.id.frame_container, deviceFragment).show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).hide(deviceFragment).commit();
     }
 
     private void showSlotFragment() {
         if (alarmFragment != null) {
             mBind.ivSave.setVisibility(View.GONE);
-            fragmentManager.beginTransaction()
-                    .hide(settingFragment)
-                    .hide(deviceFragment)
-                    .show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment)
-                    .commit();
+            fragmentManager.beginTransaction().hide(settingFragment).hide(deviceFragment).show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.alarm_title));
     }
@@ -574,11 +540,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     private void showSettingFragment() {
         if (settingFragment != null) {
             mBind.ivSave.setVisibility(View.VISIBLE);
-            fragmentManager.beginTransaction()
-                    .hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment)
-                    .hide(deviceFragment)
-                    .show(settingFragment)
-                    .commit();
+            fragmentManager.beginTransaction().hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(deviceFragment).show(settingFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.setting_title));
     }
@@ -586,11 +548,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     private void showDeviceFragment() {
         if (deviceFragment != null) {
             mBind.ivSave.setVisibility(View.VISIBLE);
-            fragmentManager.beginTransaction()
-                    .hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment)
-                    .hide(settingFragment)
-                    .show(deviceFragment)
-                    .commit();
+            fragmentManager.beginTransaction().hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).show(deviceFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.device_title));
     }
@@ -645,8 +603,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
 
 
     public void onSave(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         if (mBind.radioBtnSetting.isChecked()) {
             if (settingFragment.isValid()) {
                 showSyncingProgressDialog();
@@ -666,104 +623,84 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     public void onSinglePressMode(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
     public void onDoublePressMode(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 1);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
     public void onLongPressMode(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 2);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
     public void onAbnormalInactivityMode(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 3);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
     public void onDismissAlarm(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         showSyncingProgressDialog();
         DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.setDismissAlarm());
     }
 
     public void onAlarmTypeSetting(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmNotifyTypeActivity.class : AlarmNotifyTypeCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmNotifyTypeActivity.class : AlarmNotifyTypeCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 4);
         startActivity(intent);
     }
 
     public void onAlarmEvent(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? AlarmEventActivity.class : AlarmEventCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmEventActivity.class : AlarmEventCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
     }
 
     public void onDismissAlarmConfig(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? DismissAlarmNotifyTypeActivity.class : DismissAlarmNotifyTypeCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? DismissAlarmNotifyTypeActivity.class : DismissAlarmNotifyTypeCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
     }
 
     public void onRemoteReminder(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, mSoftwareType == 0
-                ? RemoteReminderActivity.class : RemoteReminderCRActivity.class);
+        if (isWindowLocked()) return;
+        Intent intent = new Intent(this, mSoftwareType == 0 ? RemoteReminderActivity.class : RemoteReminderCRActivity.class);
         startActivity(intent);
     }
 
     public void onAcc(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         Intent intent = new Intent(this, AccDataActivity.class);
         startActivity(intent);
     }
 
     public void onPowerSavingConfig(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         Intent intent = new Intent(this, PowerSavingConfigActivity.class);
         startActivity(intent);
     }
 
     public void onResetBattery(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         AlertMessageDialog powerAlertDialog = new AlertMessageDialog();
         powerAlertDialog.setTitle("Warning！");
         powerAlertDialog.setMessage("Please ensure you have replaced the new battery for this beacon before reset the Battery");
@@ -776,14 +713,12 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     public void onQuickSwitch(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         startActivityForResult(new Intent(this, QuickSwitchActivity.class), AppConstants.REQUEST_CODE_QUICK_SWITCH);
     }
 
     public void onTurnOffBeacon(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         AlertMessageDialog powerAlertDialog = new AlertMessageDialog();
         powerAlertDialog.setTitle("Warning！");
         powerAlertDialog.setMessage("Are you sure to turn off the Beacon?Please make sure the Beacon has a button to turn on!");
@@ -795,8 +730,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     public void onResetBeacon(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         AlertMessageDialog resetDeviceDialog = new AlertMessageDialog();
         resetDeviceDialog.setTitle("Warning！");
         resetDeviceDialog.setMessage("Are you sure to reset the Beacon？");
@@ -809,8 +743,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
 
 
     public void onSystemInfo(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         Intent intent = new Intent(this, SystemInfoActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
@@ -930,14 +863,12 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     };
 
     public void onDFU(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         chooseFirmwareFile();
     }
 
     public void onModifyPassword(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         final ModifyPasswordDialog modifyPasswordDialog = new ModifyPasswordDialog();
         modifyPasswordDialog.setOnModifyPasswordClicked(new ModifyPasswordDialog.ModifyPasswordClickListener() {
             @Override
