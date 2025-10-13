@@ -37,7 +37,7 @@ public class DeviceListAdapter extends BaseQuickAdapter<AdvInfo, BaseViewHolder>
         for (Integer integer : item.advDataHashMap.keySet()) {
             AdvInfo.AdvData advData = item.advDataHashMap.get(integer);
             XLog.i(advData.toString());
-            if (advData.frameType == 0x50) {
+            if (advData.frameType == 0x02 || advData.frameType == 0x50) {
                 helper.setVisible(R.id.tv_tx_power, false);
                 View view = LayoutInflater.from(mContext).inflate(R.layout.d_adv_ibeacon, null);
                 TextView tvUUID = view.findViewById(R.id.tv_uuid);

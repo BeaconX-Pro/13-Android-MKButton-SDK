@@ -3,6 +3,7 @@ package com.moko.bxp.button.d.utils;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 import com.elvishew.xlog.XLog;
 import com.moko.ble.lib.utils.MokoUtils;
@@ -34,7 +35,8 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
         ScanResult result = deviceInfo.scanResult;
         ScanRecord record = result.getScanRecord();
         Map<ParcelUuid, byte[]> map = record.getServiceData();
-        if (map == null || map.isEmpty()) return null;
+        SparseArray<byte[]> manufacturerData = record.getManufacturerSpecificData();
+        if ((map == null || map.isEmpty()) && manufacturerData == null) return null;
         int battery = -1;
         int triggerStatus = -1;
         int triggerCount = -1;
@@ -58,8 +60,9 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
         String instanceId = "";
 //        String dataStr = "";
         byte[] dataBytes = new byte[0];
-        byte[] manufacturerBytes = record.getManufacturerSpecificData(0x004C);
-        if (null != manufacturerBytes && manufacturerBytes.length == 23) {
+        if (manufacturerData != null) {
+            byte[] manufacturerBytes = record.getManufacturerSpecificData(0x004C);
+            if (null == manufacturerBytes || manufacturerBytes.length != 23) return null;
             frameType = manufacturerBytes[0];
             String uuidRaw = MokoUtils.bytesToHexString(Arrays.copyOfRange(manufacturerBytes, 2, 18)).toLowerCase(Locale.ROOT);
             StringBuilder stringBuilder = new StringBuilder(uuidRaw);
@@ -72,69 +75,71 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
             minor = MokoUtils.toInt(Arrays.copyOfRange(manufacturerBytes, 20, 22));
             rssi1m = manufacturerBytes[22];
             dataBytes = manufacturerBytes;
-        }
 
-        final Iterator iterator = map.keySet().iterator();
-        while (iterator.hasNext()) {
-            final ParcelUuid parcelUuid = (ParcelUuid) iterator.next();
-            if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_DEVICE.getUuid())) {
-                byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_DEVICE.getUuid()));
-                if (data == null || data.length < 21)
-                    continue;
-                deviceInfoFrame = data[0] & 0xFF;
-                accX = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 4, 6));
-                accY = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 6, 8));
-                accZ = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 8, 10));
+        }
+        if (map != null) {
+            final Iterator iterator = map.keySet().iterator();
+            while (iterator.hasNext()) {
+                final ParcelUuid parcelUuid = (ParcelUuid) iterator.next();
+                if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_DEVICE.getUuid())) {
+                    byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_DEVICE.getUuid()));
+                    if (data == null || data.length < 21) continue;
+                    deviceInfoFrame = data[0] & 0xFF;
+                    accX = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 4, 6));
+                    accY = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 6, 8));
+                    accZ = MokoUtils.toIntSigned(Arrays.copyOfRange(data, 8, 10));
 //                int tempInteger = data[10];
 //                int tempDecimal = data[11] & 0xFF;
 //                beaconTemp = String.format("%d.%d", tempInteger, tempDecimal);
-                rangeData = data[12];
-                battery = MokoUtils.toInt(Arrays.copyOfRange(data, 13, 15));
-            }
-            if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_TRIGGER.getUuid())) {
-                byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_TRIGGER.getUuid()));
-                if (data == null || data.length < 7) continue;
+                    rangeData = data[12];
+                    battery = MokoUtils.toInt(Arrays.copyOfRange(data, 13, 15));
+                }
+                if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_TRIGGER.getUuid())) {
+                    byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_TRIGGER.getUuid()));
+                    if (data == null || data.length < 7) continue;
 //                dataStr = MokoUtils.bytesToHexString(data);
-                dataBytes = data;
-                frameType = data[0] & 0xFF;
-                verifyEnable = (data[1] & 0x01) == 0x01 ? 1 : 0;
-                triggerStatus = (data[1] & 0x02) == 0x02 ? 1 : 0;
-                triggerCount = MokoUtils.toInt(Arrays.copyOfRange(data, 2, 4));
-                XLog.i("mac=" + deviceInfo.mac);
-                XLog.i("data=" + Arrays.toString(data));
-                deviceId = String.format("0x%s", MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 4, data.length - 2)).toUpperCase());
-                deviceType = data[data.length - 2] & 0xFF;
-            } else if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_IBEACON.getUuid())) {
-                byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_IBEACON.getUuid()));
-                if (data == null || data.length != 23) continue;
+                    dataBytes = data;
+                    frameType = data[0] & 0xFF;
+                    verifyEnable = (data[1] & 0x01) == 0x01 ? 1 : 0;
+                    triggerStatus = (data[1] & 0x02) == 0x02 ? 1 : 0;
+                    triggerCount = MokoUtils.toInt(Arrays.copyOfRange(data, 2, 4));
+                    XLog.i("mac=" + deviceInfo.mac);
+                    XLog.i("data=" + Arrays.toString(data));
+                    deviceId = String.format("0x%s", MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 4, data.length - 2)).toUpperCase());
+                    deviceType = data[data.length - 2] & 0xFF;
+                } else if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_IBEACON.getUuid())) {
+                    byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_IBEACON.getUuid()));
+                    if (data == null || data.length != 23) continue;
 //                dataStr = MokoUtils.bytesToHexString(data);
-                dataBytes = data;
-                frameType = data[0] & 0xFF;
-                rssi1m = data[1];
-                String uuidRaw = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 3, 19)).toLowerCase(Locale.ROOT);
-                StringBuilder stringBuilder = new StringBuilder(uuidRaw);
-                stringBuilder.insert(8, "-");
-                stringBuilder.insert(13, "-");
-                stringBuilder.insert(18, "-");
-                stringBuilder.insert(23, "-");
-                uuid = stringBuilder.toString();
-                major = MokoUtils.toInt(Arrays.copyOfRange(data, 19, 21));
-                minor = MokoUtils.toInt(Arrays.copyOfRange(data, 21, 23));
-                XLog.i("mac=" + deviceInfo.mac);
-                XLog.i("data=" + Arrays.toString(data));
-            } else if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_UID.getUuid())) {
-                byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_UID.getUuid()));
-                if (data == null || data.length != 20) continue;
+                    dataBytes = data;
+                    frameType = data[0] & 0xFF;
+                    rssi1m = data[1];
+                    String uuidRaw = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 3, 19)).toLowerCase(Locale.ROOT);
+                    StringBuilder stringBuilder = new StringBuilder(uuidRaw);
+                    stringBuilder.insert(8, "-");
+                    stringBuilder.insert(13, "-");
+                    stringBuilder.insert(18, "-");
+                    stringBuilder.insert(23, "-");
+                    uuid = stringBuilder.toString();
+                    major = MokoUtils.toInt(Arrays.copyOfRange(data, 19, 21));
+                    minor = MokoUtils.toInt(Arrays.copyOfRange(data, 21, 23));
+                    XLog.i("mac=" + deviceInfo.mac);
+                    XLog.i("data=" + Arrays.toString(data));
+                } else if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_UID.getUuid())) {
+                    byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_UID.getUuid()));
+                    if (data == null || data.length != 20) continue;
 //                dataStr = MokoUtils.bytesToHexString(data);
-                dataBytes = data;
-                frameType = data[0] & 0xFF;
-                rssi0m = data[1];
-                namespaceId = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 2, 12));
-                instanceId = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 12, 18));
-                XLog.i("mac=" + deviceInfo.mac);
-                XLog.i("data=" + Arrays.toString(data));
-            }
+                    dataBytes = data;
+                    frameType = data[0] & 0xFF;
+                    rssi0m = data[1];
+                    namespaceId = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 2, 12));
+                    instanceId = MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 12, 18));
+                    XLog.i("mac=" + deviceInfo.mac);
+                    XLog.i("data=" + Arrays.toString(data));
+                }
 
+            }
+            if (deviceInfoFrame == -1 && frameType == -1) return null;
         }
         if (accX != 0 || accY != 0 || accZ != 0) {
             accShown = 1;
@@ -149,8 +154,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
             if (battery >= 0) {
                 advInfo.battery = battery;
             }
-            if (result.isConnectable())
-                advInfo.connectState = 1;
+            if (result.isConnectable()) advInfo.connectState = 1;
             advInfo.txPower = record.getTxPowerLevel();
             advInfo.rangingData = rangeData;
             advInfo.deviceId = deviceId;

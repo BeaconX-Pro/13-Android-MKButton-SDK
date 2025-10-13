@@ -47,6 +47,7 @@ public class AlarmModeConfigCRActivity extends BaseActivity implements SeekBar.O
     private int mFirmwareType;
     private int mFrameType;
     public int mNotifyType;
+    public int mModeEnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,7 @@ public class AlarmModeConfigCRActivity extends BaseActivity implements SeekBar.O
         if (getIntent() != null && getIntent().getExtras() != null) {
             slotType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
             mFirmwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, 0);
+            mModeEnable = getIntent().getIntExtra(AppConstants.EXTRA_KEY_MODE_ENABLE, 0);
         }
         switch (slotType) {
             case 0:
@@ -400,6 +402,10 @@ public class AlarmModeConfigCRActivity extends BaseActivity implements SeekBar.O
     public void onSave(View view) {
         if (isWindowLocked())
             return;
+        if ((mModeEnable >> slotType & 1) == 1 && !isAdvOpen && (mModeEnable - (1 << slotType) == 0)) {
+            ToastUtils.showToast(this, "At least one mode should be open.");
+            return;
+        }
         if (isValid()) {
             showSyncingProgressDialog();
             saveParams();

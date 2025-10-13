@@ -39,9 +39,7 @@ public final class MokoBleScanner {
             XLog.i("Start scan");
         }
         final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
-        ScanSettings settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build();
+        ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
         List<ScanFilter> scanFilterList = new ArrayList<>();
         ScanFilter.Builder deviceInfoBuilder = new ScanFilter.Builder();
         deviceInfoBuilder.setServiceData(new ParcelUuid(OrderServices.SERVICE_ADV_DEVICE.getUuid()), null);

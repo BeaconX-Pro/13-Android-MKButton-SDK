@@ -75,6 +75,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public int mFirmwareType;
     public int mSoftwareType;
     public boolean mIsOpenClickEventNotify;
+    public int mModeEnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,6 +303,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                         if (length == 6) {
                                             int slot = value[4];
                                             int slotEnable = value[5] & 0xFF;
+                                            if (slotEnable == 1)
+                                                mModeEnable += 1 << slot;
                                             if (mFirmwareType == 1) {
                                                 if (slot == 0) {
                                                     alarmNewFragment.setSinglePressModeSwitch(slotEnable);
@@ -389,6 +392,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public boolean hasAcc;
 
     private void getAlarmSwitch() {
+        mModeEnable = 0;
         showSyncingProgressDialog();
         ArrayList<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.getSlotParams(0));
@@ -474,13 +478,14 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         if (requestCode == AppConstants.REQUEST_CODE_ALARM_MODE) {
             if (resultCode == RESULT_OK) {
                 int slotType = data.getIntExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
+                mModeEnable = 0;
                 showSyncingProgressDialog();
                 mBind.ivSave.postDelayed(() -> {
                     ArrayList<OrderTask> orderTasks = new ArrayList<>();
-                    if (slotType == 0) orderTasks.add(OrderTaskAssembler.getSlotParams(0));
-                    else if (slotType == 1) orderTasks.add(OrderTaskAssembler.getSlotParams(1));
-                    else if (slotType == 2) orderTasks.add(OrderTaskAssembler.getSlotParams(2));
-                    else if (slotType == 3) orderTasks.add(OrderTaskAssembler.getSlotParams(3));
+                    orderTasks.add(OrderTaskAssembler.getSlotParams(0));
+                    orderTasks.add(OrderTaskAssembler.getSlotParams(1));
+                    orderTasks.add(OrderTaskAssembler.getSlotParams(2));
+                    orderTasks.add(OrderTaskAssembler.getSlotParams(3));
                     DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
                 }, 100);
             }
@@ -627,6 +632,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 0);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+        intent.putExtra(AppConstants.EXTRA_KEY_MODE_ENABLE, mModeEnable);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
@@ -635,6 +641,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 1);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+        intent.putExtra(AppConstants.EXTRA_KEY_MODE_ENABLE, mModeEnable);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
@@ -643,6 +650,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 2);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+        intent.putExtra(AppConstants.EXTRA_KEY_MODE_ENABLE, mModeEnable);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
@@ -651,6 +659,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmModeConfigActivity.class : AlarmModeConfigCRActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_SLOT_TYPE, 3);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+        intent.putExtra(AppConstants.EXTRA_KEY_MODE_ENABLE, mModeEnable);
         startActivityForResult(intent, AppConstants.REQUEST_CODE_ALARM_MODE);
     }
 
