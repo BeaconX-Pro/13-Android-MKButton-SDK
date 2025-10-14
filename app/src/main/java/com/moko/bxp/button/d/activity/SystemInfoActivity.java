@@ -36,7 +36,7 @@ public class SystemInfoActivity extends BaseActivity {
         mBind = DActivitySystemInfoBinding.inflate(getLayoutInflater());
         setContentView(mBind.getRoot());
         int firmwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, 0);
-        mBind.rlBatteryPercent.setVisibility(firmwareType == 1 ? View.VISIBLE : View.GONE);
+        mBind.rlBatteryPercent.setVisibility(firmwareType >= 1 ? View.VISIBLE : View.GONE);
         EventBus.getDefault().register(this);
         if (!DMokoSupport.getInstance().isBluetoothOpen()) {
             // 蓝牙未打开，开启蓝牙
@@ -45,7 +45,7 @@ public class SystemInfoActivity extends BaseActivity {
             showSyncingProgressDialog();
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getBattery());
-            if (firmwareType == 1) {
+            if (firmwareType >= 1) {
                 orderTasks.add(OrderTaskAssembler.getBatteryPercent());
             }
             orderTasks.add(OrderTaskAssembler.getDeviceMac());

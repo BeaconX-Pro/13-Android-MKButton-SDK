@@ -76,7 +76,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
         if (slotType == 3) {
             mBind.rlAbnormalInactivityTime.setVisibility(View.VISIBLE);
         }
-        mBind.rlFrameType.setVisibility(mFirmwareType == 1 ? View.VISIBLE : View.GONE);
+        mBind.rlFrameType.setVisibility(mFirmwareType >= 1 ? View.VISIBLE : View.GONE);
         String[] frameTypeArray = getResources().getStringArray(R.array.frame_type_array);
         mBind.npvFrameType.setDisplayedValues(frameTypeArray);
         mBind.npvFrameType.setMinValue(0);
@@ -138,7 +138,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
         } else {
             showSyncingProgressDialog();
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
-            if (mFirmwareType == 1) {
+            if (mFirmwareType >= 1) {
                 orderTasks.add(OrderTaskAssembler.getFrameType(slotType));
             }
             orderTasks.add(OrderTaskAssembler.getSlotParams(slotType));
@@ -430,7 +430,7 @@ public class AlarmModeConfigActivity extends BaseActivity implements SeekBar.OnS
                 TxPowerEnum.fromOrdinal(mBind.sbTriggerTxPower.getProgress()).getTxPower(),
                 triggerAdvTime));
 
-        if (mFirmwareType == 1) {
+        if (mFirmwareType >= 1) {
             if (mFrameType == 1) {
                 String namespaceId = mBind.etNamespace.getText().toString();
                 String instanceId = mBind.etInstanceId.getText().toString();

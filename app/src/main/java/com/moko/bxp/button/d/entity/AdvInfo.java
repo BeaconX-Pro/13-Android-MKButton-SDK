@@ -46,6 +46,7 @@ public class AdvInfo implements Serializable {
         public String instanceId;
         public String namespaceId;
         public byte[] dataBytes;
+        public int motionStatus;
 //        public String dataStr;
 
         @Override

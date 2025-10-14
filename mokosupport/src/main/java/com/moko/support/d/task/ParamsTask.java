@@ -481,6 +481,17 @@ public class ParamsTask extends OrderTask {
 
     }
 
+    public void setBtnPowerEnable(@IntRange(from = 0, to = 1) int enable) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xEA,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_BUTTON_POWER_ENABLE.getParamsKey(),
+                (byte) 0x01,
+                (byte) enable
+        };
+
+    }
+
     public void setDismissLEDNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                @IntRange(from = 0, to = 100) int interval) {
         byte[] timeBytes = MokoUtils.toByteArray(time, 2);

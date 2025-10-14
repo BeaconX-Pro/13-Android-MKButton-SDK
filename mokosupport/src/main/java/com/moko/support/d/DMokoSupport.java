@@ -13,13 +13,11 @@ import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.support.d.entity.ExportData;
 import com.moko.support.d.entity.OrderCHAR;
 import com.moko.support.d.handler.MokoCharacteristicHandler;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -61,6 +59,7 @@ public class DMokoSupport extends MokoBleLib {
 
     ///////////////////////////////////////////////////////////////////////////
     // connect
+
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -85,6 +84,7 @@ public class DMokoSupport extends MokoBleLib {
 
     ///////////////////////////////////////////////////////////////////////////
     // order
+
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -148,6 +148,9 @@ public class DMokoSupport extends MokoBleLib {
         }
         if (responseUUID.equals(OrderCHAR.CHAR_CLICK_EVENT.getUuid())) {
             orderCHAR = OrderCHAR.CHAR_CLICK_EVENT;
+        }
+        if (responseUUID.equals(OrderCHAR.CHAR_CLICK_SUB_EVENT.getUuid())) {
+            orderCHAR = OrderCHAR.CHAR_CLICK_SUB_EVENT;
         }
         if (responseUUID.equals(OrderCHAR.CHAR_LONG_CONNECTION.getUuid())) {
             orderCHAR = OrderCHAR.CHAR_LONG_CONNECTION;
@@ -223,5 +226,15 @@ public class DMokoSupport extends MokoBleLib {
     public void disableLongConnectionNotify() {
         if (mBleConfig != null)
             mBleConfig.disableLongConnectionNotify();
+    }
+
+    public void enableClickSubEventNotify() {
+        if (mBleConfig != null)
+            mBleConfig.enableClickSubEventNotify();
+    }
+
+    public void disableClickSubEventNotify() {
+        if (mBleConfig != null)
+            mBleConfig.disableClickSubEventNotify();
     }
 }

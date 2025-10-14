@@ -74,6 +74,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public boolean isConfigError;
     public int mFirmwareType;
     public int mSoftwareType;
+    public int mBoardType;
     public boolean mIsOpenClickEventNotify;
     public int mModeEnable;
 
@@ -84,6 +85,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         setContentView(mBind.getRoot());
         mFirmwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, 0);
         mSoftwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, 0);
+        mBoardType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_BOARD_TYPE, 1);
         fragmentManager = getFragmentManager();
         initFragment();
         mBind.rgOptions.setOnCheckedChangeListener(this);
@@ -196,7 +198,22 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                             if (header != 0xEB || flag != 0x02 || cmd != 0x06 || length != 0x01)
                                 return;
                             int count = value[4] & 0xFF;
-                            alarmNewFragment.setEventCount(count);
+                            if (mBoardType == 3)
+                                alarmNewFragment.setMainEventCount(count);
+                            else
+                                alarmNewFragment.setEventCount(count);
+                        }
+                        break;
+                    case CHAR_CLICK_SUB_EVENT:
+                        if (value.length == 5) {
+                            int header = value[0] & 0xFF;// 0xEB
+                            int flag = value[1] & 0xFF;// read or write
+                            int cmd = value[2] & 0xFF;
+                            int length = value[3] & 0xFF;
+                            if (header != 0xEB || flag != 0x02 || cmd != 0x08 || length != 0x01)
+                                return;
+                            int count = value[4] & 0xFF;
+                            alarmNewFragment.setSubEventCount(count);
                         }
                         break;
                 }
@@ -305,7 +322,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                             int slotEnable = value[5] & 0xFF;
                                             if (slotEnable == 1)
                                                 mModeEnable += 1 << slot;
-                                            if (mFirmwareType == 1) {
+                                            if (mFirmwareType >= 1) {
                                                 if (slot == 0) {
                                                     alarmNewFragment.setSinglePressModeSwitch(slotEnable);
                                                 } else if (slot == 1) {
@@ -317,6 +334,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                                     if (!mIsOpenClickEventNotify) {
                                                         mIsOpenClickEventNotify = true;
                                                         DMokoSupport.getInstance().enableClickEventNotify();
+                                                        if (mBoardType == 3)
+                                                            DMokoSupport.getInstance().enableClickSubEventNotify();
                                                     }
                                                 }
                                             } else {
@@ -371,7 +390,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                             int b = (val >> 1) & 0x01;
                                             int c = (val >> 2) & 0x01;
                                             XLog.i("666666a=" + val + "b=" + b + "c=" + c);
-                                            if (mFirmwareType == 1)
+                                            if (mFirmwareType >= 1)
                                                 alarmNewFragment.setAbnormalInactivityModeVisibility(hasAcc);
                                             else
                                                 alarmFragment.setAbnormalInactivityModeVisibility(hasAcc);
@@ -531,13 +550,13 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         alarmNewFragment = AlarmNewFragment.newInstance();
         settingFragment = SettingFragment.newInstance();
         deviceFragment = DeviceFragment.newInstance();
-        fragmentManager.beginTransaction().add(R.id.frame_container, mFirmwareType == 1 ? alarmNewFragment : alarmFragment).add(R.id.frame_container, settingFragment).add(R.id.frame_container, deviceFragment).show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).hide(deviceFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.frame_container, mFirmwareType >= 1 ? alarmNewFragment : alarmFragment).add(R.id.frame_container, settingFragment).add(R.id.frame_container, deviceFragment).show(mFirmwareType >= 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).hide(deviceFragment).commit();
     }
 
     private void showSlotFragment() {
         if (alarmFragment != null) {
             mBind.ivSave.setVisibility(View.GONE);
-            fragmentManager.beginTransaction().hide(settingFragment).hide(deviceFragment).show(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).commit();
+            fragmentManager.beginTransaction().hide(settingFragment).hide(deviceFragment).show(mFirmwareType >= 1 ? alarmNewFragment : alarmFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.alarm_title));
     }
@@ -545,7 +564,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     private void showSettingFragment() {
         if (settingFragment != null) {
             mBind.ivSave.setVisibility(View.VISIBLE);
-            fragmentManager.beginTransaction().hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(deviceFragment).show(settingFragment).commit();
+            fragmentManager.beginTransaction().hide(mFirmwareType >= 1 ? alarmNewFragment : alarmFragment).hide(deviceFragment).show(settingFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.setting_title));
     }
@@ -553,7 +572,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     private void showDeviceFragment() {
         if (deviceFragment != null) {
             mBind.ivSave.setVisibility(View.VISIBLE);
-            fragmentManager.beginTransaction().hide(mFirmwareType == 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).show(deviceFragment).commit();
+            fragmentManager.beginTransaction().hide(mFirmwareType >= 1 ? alarmNewFragment : alarmFragment).hide(settingFragment).show(deviceFragment).commit();
         }
         mBind.tvTitle.setText(getString(R.string.device_title));
     }
@@ -678,7 +697,11 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
 
     public void onAlarmEvent(View view) {
         if (isWindowLocked()) return;
-        Intent intent = new Intent(this, mSoftwareType == 0 ? AlarmEventActivity.class : AlarmEventCRActivity.class);
+        Intent intent = new Intent(this, AlarmEventActivity.class);
+        if (mSoftwareType == 1)
+            intent = new Intent(this, AlarmEventCRActivity.class);
+        if (mBoardType == 3)
+            intent = new Intent(this, AlarmEventB03Activity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
         startActivity(intent);
     }
@@ -723,7 +746,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
 
     public void onQuickSwitch(View view) {
         if (isWindowLocked()) return;
-        startActivityForResult(new Intent(this, QuickSwitchActivity.class), AppConstants.REQUEST_CODE_QUICK_SWITCH);
+        Intent intent = new Intent(this, QuickSwitchActivity.class);
+        intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
+        startActivityForResult(intent, AppConstants.REQUEST_CODE_QUICK_SWITCH);
     }
 
     public void onTurnOffBeacon(View view) {

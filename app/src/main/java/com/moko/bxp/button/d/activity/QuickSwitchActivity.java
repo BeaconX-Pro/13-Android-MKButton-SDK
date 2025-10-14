@@ -43,7 +43,8 @@ public class QuickSwitchActivity extends BaseActivity {
         setContentView(mBind.getRoot());
 
         EventBus.getDefault().register(this);
-
+        int softwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, 0);
+        mBind.cvTurnOffByBtn.setVisibility(softwareType == 1 ? View.VISIBLE : View.GONE);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -59,6 +60,9 @@ public class QuickSwitchActivity extends BaseActivity {
             orderTasks.add(OrderTaskAssembler.getButtonResetEnable());
             orderTasks.add(OrderTaskAssembler.getScanResponseEnable());
             orderTasks.add(OrderTaskAssembler.getDismissAlarmEnable());
+            if (softwareType == 1) {
+                orderTasks.add(OrderTaskAssembler.getBtnPowerEnable());
+            }
             DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }
     }
@@ -113,6 +117,7 @@ public class QuickSwitchActivity extends BaseActivity {
                                     case KEY_BUTTON_RESET_ENABLE:
                                     case KEY_SCAN_RESPONSE_ENABLE:
                                     case KEY_DISMISS_ALARM_ENABLE:
+                                    case KEY_BUTTON_POWER_ENABLE:
                                         if (result == 0) {
                                             isConfigError = true;
                                         }
@@ -142,6 +147,9 @@ public class QuickSwitchActivity extends BaseActivity {
                                         break;
                                     case KEY_DISMISS_ALARM_ENABLE:
                                         setDismissAlarmEnable(result);
+                                        break;
+                                    case KEY_BUTTON_POWER_ENABLE:
+                                        setBtnPowerEnable(result);
                                         break;
 
                                 }
@@ -240,6 +248,15 @@ public class QuickSwitchActivity extends BaseActivity {
         mBind.tvDismissAlarmEnable.setEnabled(enableDismissAlarm);
     }
 
+    private boolean enableBtnPower;
+
+    public void setBtnPowerEnable(int enable) {
+        this.enableBtnPower = enable == 1;
+        mBind.ivTurnOffByBtn.setImageResource(enable == 1 ? R.drawable.ic_checked : R.drawable.ic_unchecked);
+        mBind.tvTurnOffByBtn.setText(enableBtnPower ? "Enable" : "Disable");
+        mBind.tvTurnOffByBtn.setEnabled(enableBtnPower);
+    }
+
     public void onChangeConnectable(View view) {
         if (isWindowLocked())
             return;
@@ -315,6 +332,16 @@ public class QuickSwitchActivity extends BaseActivity {
         }
     }
 
+    public void onChangeBtnPower(View view) {
+        if (isWindowLocked())
+            return;
+        if (enableBtnPower) {
+            setBtnPower(false);
+        } else {
+            setBtnPower(true);
+        }
+    }
+
 
     public void setConnectable(boolean enable) {
         showSyncingProgressDialog();
@@ -353,6 +380,14 @@ public class QuickSwitchActivity extends BaseActivity {
         ArrayList<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.setDismissAlarmEnable(enable ? 1 : 0));
         orderTasks.add(OrderTaskAssembler.getDismissAlarmEnable());
+        DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
+    public void setBtnPower(boolean enable) {
+        showSyncingProgressDialog();
+        ArrayList<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setBtnPowerEnable(enable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getBtnPowerEnable());
         DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 

@@ -95,9 +95,20 @@ public class DeviceListAdapter extends BaseQuickAdapter<AdvInfo, BaseViewHolder>
                 TextView tvTriggerType = view.findViewById(R.id.tv_trigger_type);
                 TextView tvTriggerStatus = view.findViewById(R.id.tv_trigger_status);
                 TextView tvTriggerCount = view.findViewById(R.id.tv_trigger_count);
+                TextView tvMotionStatus = view.findViewById(R.id.tv_motion_status);
                 RelativeLayout rlTriggerCount = view.findViewById(R.id.rl_trigger_count);
+                RelativeLayout rlMotionStatus = view.findViewById(R.id.rl_motion_status);
                 tvTriggerType.setText(triggerTypeStr);
-                tvTriggerStatus.setText(advData.triggerStatus == 0 ? "Standby" : "Triggered");
+                if (item.deviceType == 2) {
+                    rlMotionStatus.setVisibility(View.VISIBLE);
+                    if (advData.triggerStatus == 0) tvTriggerStatus.setText("Standby");
+                    else if (advData.triggerStatus == 2) tvTriggerStatus.setText("Main-Triggered");
+                    else if (advData.triggerStatus == 4) tvTriggerStatus.setText("Sub-Triggered");
+                    tvMotionStatus.setText(advData.motionStatus == 0 ? "Stationary" : "Moving");
+                } else {
+                    rlMotionStatus.setVisibility(View.GONE);
+                    tvTriggerStatus.setText(advData.triggerStatus == 0 ? "Standby" : "Triggered");
+                }
                 tvTriggerCount.setText(String.valueOf(advData.triggerCount));
                 rlTriggerCount.setVisibility(advData.frameType == 0x23 ? View.GONE : View.VISIBLE);
                 parent.addView(view);

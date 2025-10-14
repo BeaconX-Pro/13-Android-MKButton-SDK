@@ -19,7 +19,7 @@ public class OrderTaskAssembler {
      * @Description 获取制造商
      */
     public static OrderTask getManufacturer(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_MANUFACTURER);
             return task;
@@ -33,7 +33,7 @@ public class OrderTaskAssembler {
      * @Description 获取设备型号
      */
     public static OrderTask getDeviceModel(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_MODEL_NUMBER);
             return task;
@@ -47,7 +47,7 @@ public class OrderTaskAssembler {
      * @Description 获取生产日期
      */
     public static OrderTask getProductDate(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_PRODUCT_DATE);
             return task;
@@ -61,7 +61,7 @@ public class OrderTaskAssembler {
      * @Description 获取硬件版本
      */
     public static OrderTask getHardwareVersion(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_HARDWARE_REVISION);
             return task;
@@ -75,7 +75,7 @@ public class OrderTaskAssembler {
      * @Description 获取固件版本
      */
     public static OrderTask getFirmwareVersion(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_FIRMWARE_REVISION);
             return task;
@@ -89,7 +89,7 @@ public class OrderTaskAssembler {
      * @Description 获取软件版本
      */
     public static OrderTask getSoftwareVersion(int firmwareType) {
-        if (firmwareType == 1) {
+        if (firmwareType >= 1) {
             ParamsTask task = new ParamsTask();
             task.getData(ParamsKeyEnum.KEY_SOFTWARE_REVISION);
             return task;
@@ -215,6 +215,7 @@ public class OrderTaskAssembler {
         task.setSystemTime();
         return task;
     }
+
     public static OrderTask getButtonResetEnable() {
         ParamsTask task = new ParamsTask();
         task.getData(ParamsKeyEnum.KEY_BUTTON_RESET_ENABLE);
@@ -239,6 +240,12 @@ public class OrderTaskAssembler {
     public static OrderTask getBatteryPercent() {
         ParamsTask task = new ParamsTask();
         task.getData(ParamsKeyEnum.KEY_BATTERY_PERCENT);
+        return task;
+    }
+
+    public static OrderTask getBoardType() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_BOARD_TYPE);
         return task;
     }
 
@@ -290,6 +297,24 @@ public class OrderTaskAssembler {
     public static OrderTask setLongPressEventClear() {
         ParamsTask task = new ParamsTask();
         task.setData(ParamsKeyEnum.KEY_LONG_PRESS_EVENT_CLEAR);
+        return task;
+    }
+
+    public static OrderTask setSinglePressEventClearSub() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_SINGLE_PRESS_EVENT_SUB_CLEAR);
+        return task;
+    }
+
+    public static OrderTask setDoublePressEventClearSub() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_DOUBLE_PRESS_EVENT_SUB_CLEAR);
+        return task;
+    }
+
+    public static OrderTask setLongPressEventClearSub() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_LONG_PRESS_EVENT_SUB_CLEAR);
         return task;
     }
 
@@ -441,8 +466,8 @@ public class OrderTaskAssembler {
     }
 
     public static OrderTask setSlotVibrationNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot,
-                                                        @IntRange(from = 1, to = 6000) int time,
-                                                        @IntRange(from = 1, to = 100) int interval) {
+                                                              @IntRange(from = 1, to = 6000) int time,
+                                                              @IntRange(from = 1, to = 100) int interval) {
         ParamsTask task = new ParamsTask();
         task.setSlotVibrationNotifyAlarmParams(slot, time, interval);
         return task;
@@ -512,10 +537,20 @@ public class OrderTaskAssembler {
         task.setDismissAlarmEnable(enable);
         return task;
     }
+    public static OrderTask setBtnPowerEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsTask task = new ParamsTask();
+        task.setBtnPowerEnable(enable);
+        return task;
+    }
 
     public static OrderTask getDismissAlarmEnable() {
         ParamsTask task = new ParamsTask();
         task.getData(ParamsKeyEnum.KEY_DISMISS_ALARM_ENABLE);
+        return task;
+    }
+    public static OrderTask getBtnPowerEnable() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_BUTTON_POWER_ENABLE);
         return task;
     }
 
@@ -609,6 +644,24 @@ public class OrderTaskAssembler {
     public static OrderTask getLongPressEventCount() {
         ParamsTask task = new ParamsTask();
         task.getData(ParamsKeyEnum.KEY_LONG_PRESS_EVENTS);
+        return task;
+    }
+
+    public static OrderTask getSinglePressEventCountSub() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_SINGLE_PRESS_SUB_EVENTS);
+        return task;
+    }
+
+    public static OrderTask getDoublePressEventCountSub() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_DOUBLE_PRESS_SUB_EVENTS);
+        return task;
+    }
+
+    public static OrderTask getLongPressEventCountSub() {
+        ParamsTask task = new ParamsTask();
+        task.getData(ParamsKeyEnum.KEY_LONG_PRESS_SUB_EVENTS);
         return task;
     }
 

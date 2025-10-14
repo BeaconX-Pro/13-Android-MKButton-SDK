@@ -24,6 +24,7 @@ final class MokoBleConfig extends MokoBleManager {
     private BluetoothGattCharacteristic doubleTriggerCharacteristic;
     private BluetoothGattCharacteristic longTriggerCharacteristic;
     private BluetoothGattCharacteristic longConnectionCharacteristic;
+    private BluetoothGattCharacteristic clickSubEventCharacteristic;
     private BluetoothGattCharacteristic accCharacteristic;
     private BluetoothGattCharacteristic passwordCharacteristic;
     private BluetoothGattCharacteristic clickEventCharacteristic;
@@ -45,6 +46,7 @@ final class MokoBleConfig extends MokoBleManager {
             doubleTriggerCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_DOUBLE_TRIGGER.getUuid());
             longTriggerCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_LONG_TRIGGER.getUuid());
             longConnectionCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_LONG_CONNECTION.getUuid());
+            clickSubEventCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_CLICK_SUB_EVENT.getUuid());
             accCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_ACC.getUuid());
             passwordCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_PASSWORD.getUuid());
             clickEventCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_CLICK_EVENT.getUuid());
@@ -215,6 +217,19 @@ final class MokoBleConfig extends MokoBleManager {
 
     public void disableClickEventNotify() {
         disableNotifications(clickEventCharacteristic).enqueue();
+    }
+    public void enableClickSubEventNotify() {
+        setNotificationCallback(clickSubEventCharacteristic).with((device, data) -> {
+            final byte[] value = data.getValue();
+            XLog.e("onDataReceived");
+            XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
+            mMokoResponseCallback.onCharacteristicChanged(clickSubEventCharacteristic, value);
+        });
+        enableNotifications(clickSubEventCharacteristic).enqueue();
+    }
+
+    public void disableClickSubEventNotify() {
+        disableNotifications(clickSubEventCharacteristic).enqueue();
     }
 
     public void enableLongConnectionNotify() {

@@ -23,10 +23,14 @@ public class AlarmNewFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBind = FragmentDAlarmNewBinding.inflate(inflater, container, false);
         activity = (DeviceInfoActivity) getActivity();
+        if (activity.mBoardType == 3) {
+            mBind.clLongConnectionAlarmEvents.setVisibility(View.VISIBLE);
+        } else {
+            mBind.rlLongConnectionAlarmEvents.setVisibility(View.VISIBLE);
+        }
         return mBind.getRoot();
     }
 
@@ -53,5 +57,13 @@ public class AlarmNewFragment extends Fragment {
 
     public void setEventCount(int count) {
         mBind.tvEventCount.setText(String.valueOf(count));
+    }
+
+    public void setSubEventCount(int count) {
+        mBind.tvEventCountSub.setText(String.valueOf(count));
+    }
+
+    public void setMainEventCount(int count) {
+        mBind.tvEventCountMain.setText(String.valueOf(count));
     }
 }

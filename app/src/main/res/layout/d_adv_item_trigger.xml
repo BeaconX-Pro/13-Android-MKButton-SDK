@@ -75,4 +75,28 @@
             android:textSize="12sp" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/rl_motion_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="Motion status"
+            android:textColor="@color/grey_999999"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tv_motion_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="150dp"
+            android:text=""
+            android:textColor="@color/grey_666666"
+            android:textSize="12sp" />
+    </RelativeLayout>
+
 </LinearLayout>

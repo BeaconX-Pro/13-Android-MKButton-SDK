@@ -75,6 +75,6 @@ public class SettingFragment extends Fragment {
     }
 
     public void setResetBatteryVisible(int mFirmwareType) {
-        mBind.llResetBattery.setVisibility(mFirmwareType == 1 ? View.VISIBLE : View.GONE);
+        mBind.llResetBattery.setVisibility(mFirmwareType >= 1 ? View.VISIBLE : View.GONE);
     }
 }

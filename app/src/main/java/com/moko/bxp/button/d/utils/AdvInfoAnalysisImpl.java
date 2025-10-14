@@ -51,6 +51,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
         int rangeData = -1;
         int verifyEnable = 0;
         int deviceType = 0;
+        int motionStatus = 0;
         String uuid = "";
         int major = 0;
         int minor = 0;
@@ -101,12 +102,13 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
                     dataBytes = data;
                     frameType = data[0] & 0xFF;
                     verifyEnable = (data[1] & 0x01) == 0x01 ? 1 : 0;
-                    triggerStatus = (data[1] & 0x02) == 0x02 ? 1 : 0;
+                    triggerStatus = data[1] & 0x06;
                     triggerCount = MokoUtils.toInt(Arrays.copyOfRange(data, 2, 4));
                     XLog.i("mac=" + deviceInfo.mac);
                     XLog.i("data=" + Arrays.toString(data));
                     deviceId = String.format("0x%s", MokoUtils.bytesToHexString(Arrays.copyOfRange(data, 4, data.length - 2)).toUpperCase());
                     deviceType = data[data.length - 2] & 0xFF;
+                    motionStatus = data[data.length - 1] & 0xFF;
                 } else if (parcelUuid.getUuid().equals(OrderServices.SERVICE_ADV_IBEACON.getUuid())) {
                     byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV_IBEACON.getUuid()));
                     if (data == null || data.length != 23) continue;
@@ -214,6 +216,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
             triggerData.frameType = frameType;
             triggerData.triggerStatus = triggerStatus;
             triggerData.triggerCount = triggerCount;
+            triggerData.motionStatus = motionStatus;
             advInfo.advDataHashMap.put(frameType, triggerData);
         }
         advInfo.deviceInfoFrame = deviceInfoFrame;

@@ -80,10 +80,16 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
     // 0:-D
     // 1:-CR
     private int mSoftwareType;
+    // 1:B2
+    // 2:B3
+    // 3:双按键
+    private int mBoardType;
 
     private static final String REGEX = "^BXP-B(\\d)*(-D|-CR)*\\S+";
 
     private Pattern mPattern = Pattern.compile(REGEX);
+
+    private int mDeviceType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,9 +261,21 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     }
                                     if (softwareVersionStr.contains("CR"))
                                         mSoftwareType = 1;
+                                    if (mFirmwareType == 2 && softwareVersionStr.contains("BXP-B-D")){
+                                        DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
+                                    } else {
+                                        Intent intent = new Intent(this, DeviceInfoActivity.class);
+                                        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+                                        intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
+                                        startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
+                                    }
+                                    break;
+                                case KEY_BOARD_TYPE:
+                                    mBoardType = value[4];
                                     Intent intent = new Intent(this, DeviceInfoActivity.class);
                                     intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
                                     intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
+                                    intent.putExtra(AppConstants.EXTRA_KEY_BOARD_TYPE, mBoardType);
                                     startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
                                     break;
                             }
@@ -381,6 +399,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
         AdvInfo advInfo = advInfoAnalysisImpl.parseDeviceInfo(deviceInfo);
         if (advInfo == null)
             return;
+        mDeviceType = advInfo.deviceType;
         advInfoHashMap.put(advInfo.mac, advInfo);
     }
 
