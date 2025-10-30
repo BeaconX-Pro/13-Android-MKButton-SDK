@@ -261,7 +261,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     }
                                     if (softwareVersionStr.contains("CR"))
                                         mSoftwareType = 1;
-                                    if (mFirmwareType == 2 && softwareVersionStr.contains("BXP-B-D")){
+                                    if (mFirmwareType == 2 && softwareVersionStr.contains("-D")){
                                         DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
                                     } else {
                                         Intent intent = new Intent(this, DeviceInfoActivity.class);
