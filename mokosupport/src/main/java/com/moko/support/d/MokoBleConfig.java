@@ -38,6 +38,7 @@ final class MokoBleConfig extends MokoBleManager {
     @Override
     public boolean checkServiceCharacteristicSupported(BluetoothGatt gatt) {
         final BluetoothGattService service = gatt.getService(OrderServices.SERVICE_CUSTOM.getUuid());
+        final BluetoothGattService otaService = gatt.getService(OrderServices.SERVICE_OTA.getUuid());
         if (service != null) {
             this.gatt = gatt;
             paramsCharacteristic = service.getCharacteristic(OrderCHAR.CHAR_PARAMS.getUuid());
@@ -54,11 +55,20 @@ final class MokoBleConfig extends MokoBleManager {
                     && disconnectCharacteristic != null
                     && paramsCharacteristic != null;
         }
+        if (otaService != null) {
+            disconnectCharacteristic = null;
+            this.gatt = gatt;
+            return true;
+        }
         return false;
     }
 
     @Override
     public void init() {
+        if (disconnectCharacteristic == null) {
+            requestMtu(247).done(bluetoothDevice -> mMokoResponseCallback.onServicesDiscovered(gatt)).enqueue();
+            return;
+        }
         requestMtu(247).with(((device, mtu) -> {
         })).then((device -> {
             enableDisconnectNotify();

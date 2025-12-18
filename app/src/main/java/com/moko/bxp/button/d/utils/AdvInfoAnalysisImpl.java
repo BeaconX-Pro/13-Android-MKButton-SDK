@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,7 +37,8 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
         ScanRecord record = result.getScanRecord();
         Map<ParcelUuid, byte[]> map = record.getServiceData();
         SparseArray<byte[]> manufacturerData = record.getManufacturerSpecificData();
-        if ((map == null || map.isEmpty()) && manufacturerData == null) return null;
+        List<ParcelUuid> list = record.getServiceUuids();
+        if ((map == null || map.isEmpty()) && manufacturerData == null && list == null) return null;
         int battery = -1;
         int triggerStatus = -1;
         int triggerCount = -1;
@@ -59,6 +61,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
         int rssi0m = 0;
         String namespaceId = "";
         String instanceId = "";
+        boolean isOta = false;
 //        String dataStr = "";
         byte[] dataBytes = new byte[0];
         if (manufacturerData != null) {
@@ -139,9 +142,17 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
                     XLog.i("mac=" + deviceInfo.mac);
                     XLog.i("data=" + Arrays.toString(data));
                 }
-
             }
             if (deviceInfoFrame == -1 && frameType == -1) return null;
+        }
+        if (list != null && !list.isEmpty()) {
+            Iterator iterator = list.iterator();
+            if (iterator.hasNext()) {
+                ParcelUuid parcelUuid = (ParcelUuid) iterator.next();
+                if ("MK_OTA".equals(deviceInfo.name)) {
+                    isOta = true;
+                }
+            }
         }
         if (accX != 0 || accY != 0 || accZ != 0) {
             accShown = 1;
@@ -162,6 +173,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
             advInfo.deviceId = deviceId;
             advInfo.verifyEnable = verifyEnable;
             advInfo.deviceType = deviceType;
+            advInfo.isOTA = isOta;
             advInfo.scanRecord = deviceInfo.scanRecord;
             long currentTime = SystemClock.elapsedRealtime();
             long intervalTime = currentTime - advInfo.scanTime;
@@ -187,6 +199,7 @@ public class AdvInfoAnalysisImpl implements DeviceInfoAnalysis<AdvInfo> {
             advInfo.deviceId = deviceId;
             advInfo.verifyEnable = verifyEnable;
             advInfo.deviceType = deviceType;
+            advInfo.isOTA = isOta;
             advInfo.scanRecord = deviceInfo.scanRecord;
             advInfo.scanTime = SystemClock.elapsedRealtime();
             advInfo.advDataHashMap = new LinkedHashMap<>();

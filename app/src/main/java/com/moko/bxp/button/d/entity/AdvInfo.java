@@ -21,6 +21,7 @@ public class AdvInfo implements Serializable {
     public int connectState;
     public int verifyEnable;
     public int deviceType;
+    public boolean isOTA;
     public int deviceInfoFrame;
     public String beaconTemp;
     public String deviceId;

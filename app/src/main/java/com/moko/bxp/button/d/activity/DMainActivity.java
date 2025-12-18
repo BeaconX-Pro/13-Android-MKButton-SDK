@@ -192,13 +192,21 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
 //                Intent i = new Intent(this, DeviceInfoActivity.class);
 //                startActivityForResult(i, AppConstants.REQUEST_CODE_DEVICE_INFO);
 //            } else {
-            showLoadingProgressDialog();
-            mHandler.postDelayed(() -> {
-                ArrayList<OrderTask> orderTasks = new ArrayList<>();
-                orderTasks.add(OrderTaskAssembler.getVerifyPasswordEnable());
+            if (isOTA) {
+                //连接成功不需要密码
+                dismissLoadingProgressDialog();
+                Intent intent = new Intent(this, DfuActivity.class);
+                intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_MAC, mSelectedDeviceMac);
+                startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
+            } else {
+                showLoadingProgressDialog();
+                mHandler.postDelayed(() -> {
+                    ArrayList<OrderTask> orderTasks = new ArrayList<>();
+                    orderTasks.add(OrderTaskAssembler.getVerifyPasswordEnable());
 //                orderTasks.add(OrderTaskAssembler.setPassword(mPassword));
-                DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-            }, 500);
+                    DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+                }, 500);
+            }
 //            }
         }
     }
@@ -224,6 +232,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                         showDeviceTypeErrorDialog();
                         return;
                     }
+                    mFirmwareType = 0;
                     Intent i = new Intent(this, DeviceInfoActivity.class);
                     i.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
                     startActivityForResult(i, AppConstants.REQUEST_CODE_DEVICE_INFO);
@@ -261,7 +270,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     }
                                     if (softwareVersionStr.contains("CR"))
                                         mSoftwareType = 1;
-                                    if (mFirmwareType == 2 && softwareVersionStr.contains("-D")){
+                                    if (mFirmwareType == 2 && softwareVersionStr.contains("-D")) {
                                         DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
                                     } else {
                                         Intent intent = new Intent(this, DeviceInfoActivity.class);
@@ -509,6 +518,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
     private String mPassword;
     private String mSavedPassword;
     private String mSelectedDeviceMac;
+    private boolean isOTA;
 
     @Override
     public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
@@ -526,6 +536,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                 mokoBleScanner.stopScanDevice();
             }
             mSelectedDeviceMac = advInfo.mac;
+            isOTA = advInfo.isOTA;
 //            if (advInfo.verifyEnable == 1) {
 //                // 开启验证
 //                showPasswordDialog();

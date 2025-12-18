@@ -56,6 +56,9 @@ public final class MokoBleScanner {
         ScanFilter.Builder appleiBeaconBuilder = new ScanFilter.Builder();
         appleiBeaconBuilder.setManufacturerData(0x004C, null);
         scanFilterList.add(appleiBeaconBuilder.build());
+        ScanFilter.Builder otaBuilder = new ScanFilter.Builder();
+        otaBuilder.setServiceUuid(new ParcelUuid(OrderServices.SERVICE_ADV_OTA.getUuid()), null);
+        scanFilterList.add(otaBuilder.build());
         mMokoLeScanHandler = new MokoLeScanHandler(callback);
         scanner.startScan(scanFilterList, settings, mMokoLeScanHandler);
         callback.onStartScan();

@@ -49,6 +49,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 
 import androidx.annotation.IdRes;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -77,6 +78,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     public int mBoardType;
     public boolean mIsOpenClickEventNotify;
     public int mModeEnable;
+    private boolean isUpgradeDisconnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +103,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         }
         showSyncingProgressDialog();
         mBind.tvTitle.postDelayed(() -> {
-            DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getSensorType());
+            ArrayList<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getSoftwareVersion(mFirmwareType));
+            orderTasks.add(OrderTaskAssembler.getSensorType());
+            DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }, 200);
 //        getAlarmSwitch();
     }
@@ -113,7 +118,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         runOnUiThread(() -> {
             if (MokoConstants.ACTION_DISCONNECTED.equals(action)) {
                 // 设备断开，通知页面更新
-                if (mIsClose) return;
+                if ((isUpgradeDisconnected && isUpgrading) || mIsClose) return;
                 if (mDisconnectType > 0) return;
                 if (DMokoSupport.getInstance().isBluetoothOpen()) {
                     if (isUpgrading) {
@@ -382,7 +387,12 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                             deviceFragment.setDeviceId(deviceIdHex);
                                         }
                                         break;
-
+                                    case KEY_SOFTWARE_REVISION:
+                                        byte[] rawDataBytes = Arrays.copyOfRange(value, 4, 4 + length);
+                                        String softwareVersion = new String(rawDataBytes).trim();
+                                        if (softwareVersion.contains("BXP-B03-D"))
+                                            isUpgradeDisconnected = true;
+                                        break;
                                     case KEY_SENSOR_TYPE:
                                         if (length == 2) {
                                             int val = value[5] & 0xff;
@@ -465,6 +475,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             }
         }
     };
+    private String mFirmwareFilePath;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -473,14 +484,17 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             if (resultCode == RESULT_OK) {
                 //得到uri，后面就是将uri转化成file的过程。
                 Uri uri = data.getData();
-                String firmwareFilePath = FileUtils.getPath(this, uri);
-                if (TextUtils.isEmpty(firmwareFilePath)) {
+                mFirmwareFilePath = FileUtils.getPath(this, uri);
+                if (TextUtils.isEmpty(mFirmwareFilePath)) {
                     return;
                 }
-                final File firmwareFile = new File(firmwareFilePath);
+                final File firmwareFile = new File(mFirmwareFilePath);
                 if (firmwareFile.exists()) {
-                    final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac).setDeviceName(mDeviceName).setKeepBond(false).setDisableNotification(true);
-                    starter.setZip(null, firmwareFilePath);
+                    final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac)
+                            .setDeviceName(mDeviceName)
+                            .setKeepBond(false)
+                            .setDisableNotification(true);
+                    starter.setZip(null, mFirmwareFilePath);
                     starter.start(this, DfuServiceBtn.class);
                     showDFUProgressDialog("Waiting...");
                 } else {
@@ -876,6 +890,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         public void onDfuCompleted(String deviceAddress) {
             XLog.w("onDfuCompleted...");
             isUpgradeCompleted = true;
+            dismissDFUProgressDialog();
         }
 
         @Override
@@ -893,6 +908,16 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         @Override
         public void onError(String deviceAddress, int error, int errorType, String message) {
             XLog.i("DFU Error:" + message);
+            if (!isUpgradeDisconnected) return;
+            XLog.i("DFU Error Code:" + error);
+            XLog.i("DFU Error Type:" + errorType);
+            mBind.tvTitle.postDelayed(() -> {
+                final DfuServiceInitiator starter = new DfuServiceInitiator(mDeviceMac)
+                        .setKeepBond(false)
+                        .setDisableNotification(true);
+                starter.setZip(null, mFirmwareFilePath);
+                starter.start(DeviceInfoActivity.this, DfuServiceBtn.class);
+            }, 3000);
         }
     };
 
