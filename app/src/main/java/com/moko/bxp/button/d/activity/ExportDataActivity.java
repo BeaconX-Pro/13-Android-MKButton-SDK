@@ -103,7 +103,7 @@ public class ExportDataActivity extends BaseActivity {
         EventBus.getDefault().register(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -113,7 +113,7 @@ public class ExportDataActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         final String action = event.getAction();
         if (MokoConstants.ACTION_CURRENT_DATA.equals(action)) {
@@ -243,13 +243,13 @@ public class ExportDataActivity extends BaseActivity {
     private void back() {
         if (mIsSync) {
             if (slotType == 0) {
-                DMokoSupport.getInstance().disableSingleTriggerNotify();
+                DMokoSupport.getInstance().disableSingleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 1) {
-                DMokoSupport.getInstance().disableDoubleTriggerNotify();
+                DMokoSupport.getInstance().disableDoubleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 2) {
-                DMokoSupport.getInstance().disableLongTriggerNotify();
+                DMokoSupport.getInstance().disableLongTriggerNotify(OrderTaskAssembler.dataAddress);
             }
         }
         finish();
@@ -271,26 +271,26 @@ public class ExportDataActivity extends BaseActivity {
             mBind.ivSync.startAnimation(animation);
             mBind.tvSync.setText("Stop");
             if (slotType == 0) {
-                DMokoSupport.getInstance().enableSingleTriggerNotify();
+                DMokoSupport.getInstance().enableSingleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 1) {
-                DMokoSupport.getInstance().enableDoubleTriggerNotify();
+                DMokoSupport.getInstance().enableDoubleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 2) {
-                DMokoSupport.getInstance().enableLongTriggerNotify();
+                DMokoSupport.getInstance().enableLongTriggerNotify(OrderTaskAssembler.dataAddress);
             }
         } else {
             mIsSync = false;
             mBind.ivSync.clearAnimation();
             mBind.tvSync.setText("Sync");
             if (slotType == 0) {
-                DMokoSupport.getInstance().disableSingleTriggerNotify();
+                DMokoSupport.getInstance().disableSingleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 1) {
-                DMokoSupport.getInstance().disableDoubleTriggerNotify();
+                DMokoSupport.getInstance().disableDoubleTriggerNotify(OrderTaskAssembler.dataAddress);
             }
             if (slotType == 2) {
-                DMokoSupport.getInstance().disableLongTriggerNotify();
+                DMokoSupport.getInstance().disableLongTriggerNotify(OrderTaskAssembler.dataAddress);
             }
         }
     }

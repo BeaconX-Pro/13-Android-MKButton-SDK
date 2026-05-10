@@ -25,29 +25,20 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class RemoteReminderCRActivity extends BaseActivity {
+public class BatchRemoteReminderActivity extends BaseActivity {
 
     private DActivityRemoteReminderNotifyTypeBinding mBind;
     public boolean isConfigError;
+    public ArrayList<String> mConnectedMac;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBind = DActivityRemoteReminderNotifyTypeBinding.inflate(getLayoutInflater());
+        mBind.tvTitle.setText("Batch remote reminder");
+        mConnectedMac = DMokoSupport.getInstance().getConnectedDeviceList();
         setContentView(mBind.getRoot());
         EventBus.getDefault().register(this);
-        mBind.clVibrationNotify.setVisibility(View.VISIBLE);
-        if (!DMokoSupport.getInstance().isBluetoothOpen()) {
-            // 蓝牙未打开，开启蓝牙
-            DMokoSupport.getInstance().enableBluetooth();
-        } else {
-            showSyncingProgressDialog();
-            ArrayList<OrderTask> orderTasks = new ArrayList<>();
-            orderTasks.add(OrderTaskAssembler.getRemoteLEDNotifyAlarmParams());
-            orderTasks.add(OrderTaskAssembler.getRemoteVibrationNotifyAlarmParams());
-            orderTasks.add(OrderTaskAssembler.getRemoteBuzzerNotifyAlarmParams());
-            DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-        }
     }
 
 
@@ -57,7 +48,7 @@ public class RemoteReminderCRActivity extends BaseActivity {
         runOnUiThread(() -> {
             if (MokoConstants.ACTION_DISCONNECTED.equals(action)) {
                 // 设备断开，通知页面更新
-                RemoteReminderCRActivity.this.finish();
+                BatchRemoteReminderActivity.this.finish();
             }
         });
     }
@@ -95,44 +86,16 @@ public class RemoteReminderCRActivity extends BaseActivity {
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
                                     case KEY_REMOTE_LED_NOTIFY_ALARM_PARAMS:
-                                    case KEY_REMOTE_VIBRATION_NOTIFY_ALARM_PARAMS:
                                     case KEY_REMOTE_BUZZER_NOTIFY_ALARM_PARAMS:
                                         if (result == 0) {
                                             isConfigError = true;
                                         }
+                                        mConfigCount++;
+                                        if (mConfigCount != mConnectedMac.size()) return;
                                         if (isConfigError) {
-                                            ToastUtils.showToast(RemoteReminderCRActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(BatchRemoteReminderActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             ToastUtils.showToast(this, "Success");
-                                        }
-                                        break;
-                                }
-                            }
-                            if (flag == 0x00) {
-                                // read
-                                switch (configKeyEnum) {
-                                    case KEY_REMOTE_LED_NOTIFY_ALARM_PARAMS:
-                                        if (length == 4) {
-                                            int time = MokoUtils.toInt(Arrays.copyOfRange(value, 4, 6));
-                                            int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 6, 8));
-                                            mBind.etBlinkingTime.setText(String.valueOf(time));
-                                            mBind.etBlinkingInterval.setText(String.valueOf(interval));
-                                        }
-                                        break;
-                                    case KEY_REMOTE_VIBRATION_NOTIFY_ALARM_PARAMS:
-                                        if (length == 4) {
-                                            int time = MokoUtils.toInt(Arrays.copyOfRange(value, 4, 6));
-                                            int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 6, 8));
-                                            mBind.etVibrationTime.setText(String.valueOf(time));
-                                            mBind.etVibrationInterval.setText(String.valueOf(interval));
-                                        }
-                                        break;
-                                    case KEY_REMOTE_BUZZER_NOTIFY_ALARM_PARAMS:
-                                        if (length == 4) {
-                                            int time = MokoUtils.toInt(Arrays.copyOfRange(value, 4, 6));
-                                            int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 6, 8));
-                                            mBind.etRingingTime.setText(String.valueOf(time));
-                                            mBind.etRingingInterval.setText(String.valueOf(interval));
                                         }
                                         break;
                                 }
@@ -163,6 +126,8 @@ public class RemoteReminderCRActivity extends BaseActivity {
             mLoadingMessageDialog.dismissAllowingStateLoss();
     }
 
+    private int mConfigCount;
+
     public void onLedNotifyRemind(View view) {
         if (isWindowLocked()) return;
         if (isLEDValid()) {
@@ -171,30 +136,19 @@ public class RemoteReminderCRActivity extends BaseActivity {
             String ledIntervalStr = mBind.etBlinkingInterval.getText().toString();
             int ledTime = Integer.parseInt(ledTimeStr);
             int ledInterval = Integer.parseInt(ledIntervalStr);
+            mConfigCount = 0;
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
-            orderTasks.add(OrderTaskAssembler.setRemoteLEDNotifyAlarmParams(ledTime, ledInterval));
+            for (int i = 0; i < mConnectedMac.size(); i++) {
+                String mac = mConnectedMac.get(i);
+                OrderTaskAssembler.setAddress(mac);
+                orderTasks.add(OrderTaskAssembler.setRemoteLEDNotifyAlarmParams(ledTime, ledInterval));
+            }
             DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         } else {
             ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
         }
     }
 
-    public void onVibrationNotifyRemind(View view) {
-        if (isWindowLocked())
-            return;
-        if (isVibrationValid()) {
-            showSyncingProgressDialog();
-            String vibrationTimeStr = mBind.etVibrationTime.getText().toString();
-            String vibrationIntervalStr = mBind.etVibrationInterval.getText().toString();
-            int vibrationTime = Integer.parseInt(vibrationTimeStr);
-            int vibrationInterval = Integer.parseInt(vibrationIntervalStr);
-            ArrayList<OrderTask> orderTasks = new ArrayList<>();
-            orderTasks.add(OrderTaskAssembler.setRemoteVibrationNotifyAlarmParams(vibrationTime, vibrationInterval));
-            DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-        } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
-        }
-    }
     public void onBuzzerNotifyRemind(View view) {
         if (isWindowLocked())
             return;
@@ -205,7 +159,11 @@ public class RemoteReminderCRActivity extends BaseActivity {
             int buzzerTime = Integer.parseInt(buzzerTimeStr);
             int buzzerInterval = Integer.parseInt(buzzerIntervalStr);
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
-            orderTasks.add(OrderTaskAssembler.setRemoteBuzzerNotifyAlarmParams(buzzerTime, buzzerInterval));
+            for (int i = 0; i < mConnectedMac.size(); i++) {
+                String mac = mConnectedMac.get(i);
+                OrderTaskAssembler.setAddress(mac);
+                orderTasks.add(OrderTaskAssembler.setRemoteBuzzerNotifyAlarmParams(buzzerTime, buzzerInterval));
+            }
             DMokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         } else {
             ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
@@ -242,21 +200,6 @@ public class RemoteReminderCRActivity extends BaseActivity {
             return false;
         int ledInterval = Integer.parseInt(ledIntervalStr);
         if (ledInterval < 0 || ledInterval > 100)
-            return false;
-        return true;
-    }
-
-    private boolean isVibrationValid() {
-        String vibrationTimeStr = mBind.etVibrationTime.getText().toString();
-        String vibrationIntervalStr = mBind.etVibrationInterval.getText().toString();
-        if (TextUtils.isEmpty(vibrationTimeStr) || TextUtils.isEmpty(vibrationIntervalStr)) {
-            return false;
-        }
-        int vibrationTime = Integer.parseInt(vibrationTimeStr);
-        if (vibrationTime < 1 || vibrationTime > 6000)
-            return false;
-        int vibrationInterval = Integer.parseInt(vibrationIntervalStr);
-        if (vibrationInterval > 100)
             return false;
         return true;
     }

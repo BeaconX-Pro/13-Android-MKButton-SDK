@@ -14,17 +14,22 @@ import com.moko.support.d.task.PasswordTask;
 import androidx.annotation.IntRange;
 
 public class OrderTaskAssembler {
+    public static String dataAddress;
+
+    public static void setAddress(String address) {
+        dataAddress = address;
+    }
 
     /**
      * @Description 获取制造商
      */
     public static OrderTask getManufacturer(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_MANUFACTURER);
             return task;
         } else {
-            GetManufacturerNameTask task = new GetManufacturerNameTask();
+            GetManufacturerNameTask task = new GetManufacturerNameTask(dataAddress);
             return task;
         }
     }
@@ -34,11 +39,11 @@ public class OrderTaskAssembler {
      */
     public static OrderTask getDeviceModel(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_MODEL_NUMBER);
             return task;
         } else {
-            GetModelNumberTask task = new GetModelNumberTask();
+            GetModelNumberTask task = new GetModelNumberTask(dataAddress);
             return task;
         }
     }
@@ -48,11 +53,11 @@ public class OrderTaskAssembler {
      */
     public static OrderTask getProductDate(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_PRODUCT_DATE);
             return task;
         } else {
-            GetSerialNumberTask task = new GetSerialNumberTask();
+            GetSerialNumberTask task = new GetSerialNumberTask(dataAddress);
             return task;
         }
     }
@@ -62,11 +67,11 @@ public class OrderTaskAssembler {
      */
     public static OrderTask getHardwareVersion(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_HARDWARE_REVISION);
             return task;
         } else {
-            GetHardwareRevisionTask task = new GetHardwareRevisionTask();
+            GetHardwareRevisionTask task = new GetHardwareRevisionTask(dataAddress);
             return task;
         }
     }
@@ -76,11 +81,11 @@ public class OrderTaskAssembler {
      */
     public static OrderTask getFirmwareVersion(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_FIRMWARE_REVISION);
             return task;
         } else {
-            GetFirmwareRevisionTask task = new GetFirmwareRevisionTask();
+            GetFirmwareRevisionTask task = new GetFirmwareRevisionTask(dataAddress);
             return task;
         }
     }
@@ -90,24 +95,24 @@ public class OrderTaskAssembler {
      */
     public static OrderTask getSoftwareVersion(int firmwareType) {
         if (firmwareType >= 1) {
-            ParamsTask task = new ParamsTask();
+            ParamsTask task = new ParamsTask(dataAddress);
             task.getData(ParamsKeyEnum.KEY_SOFTWARE_REVISION);
             return task;
         } else {
-            GetSoftwareRevisionTask task = new GetSoftwareRevisionTask();
+            GetSoftwareRevisionTask task = new GetSoftwareRevisionTask(dataAddress);
             return task;
         }
     }
 
 
     public static OrderTask getDeviceMac() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DEVICE_MAC);
         return task;
     }
 
     public static OrderTask getAxisParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_AXIS_PARAMS);
         return task;
     }
@@ -115,7 +120,7 @@ public class OrderTaskAssembler {
     public static OrderTask setAxisParams(@IntRange(from = 0, to = 4) int rate,
                                           @IntRange(from = 0, to = 3) int scale,
                                           @IntRange(from = 1, to = 2048) int sensitivity) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setAxisParams(rate, scale, sensitivity);
         return task;
     }
@@ -124,7 +129,7 @@ public class OrderTaskAssembler {
      * @Description 获取连接状态
      */
     public static OrderTask getConnectable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BLE_CONNECTABLE);
         return task;
     }
@@ -133,67 +138,67 @@ public class OrderTaskAssembler {
      * @Description 设置连接状态
      */
     public static OrderTask setConnectable(int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setBleConnectable(enable);
         return task;
     }
 
     public static OrderTask getVerifyPasswordEnable() {
-        PasswordTask task = new PasswordTask();
+        PasswordTask task = new PasswordTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_VERIFY_PASSWORD_ENABLE);
         return task;
     }
 
     public static OrderTask setVerifyPasswordEnable(@IntRange(from = 0, to = 1) int enable) {
-        PasswordTask task = new PasswordTask();
+        PasswordTask task = new PasswordTask(dataAddress);
         task.setVerifyPasswordEnable(enable);
         return task;
     }
 
     public static OrderTask setPassword(String password) {
-        PasswordTask task = new PasswordTask();
+        PasswordTask task = new PasswordTask(dataAddress);
         task.setPassword(password);
         return task;
     }
 
     public static OrderTask setNewPassword(String password) {
-        PasswordTask task = new PasswordTask();
+        PasswordTask task = new PasswordTask(dataAddress);
         task.setNewPassword(password);
         return task;
     }
 
     public static OrderTask getEffectiveClickInterval() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_EFFECTIVE_CLICK_INTERVAL);
         return task;
     }
 
     public static OrderTask setEffectiveClickInterval(@IntRange(from = 500, to = 1500) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setEffectiveClickInterval(interval);
         return task;
     }
 
     public static OrderTask getScanResponseEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_SCAN_RESPONSE_ENABLE);
         return task;
     }
 
     public static OrderTask setScanResponseEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setScanResponseEnable(enable);
         return task;
     }
 
     public static OrderTask getChangePasswordDisconnectEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_CHANGE_PASSWORD_DISCONNECT_ENABLE);
         return task;
     }
 
     public static OrderTask setChangePasswordDisconnectEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setChangePasswordDisconnectEnable(enable);
         return task;
     }
@@ -202,7 +207,7 @@ public class OrderTaskAssembler {
      * @Description 获取UTC0时区时间
      */
     public static OrderTask getSystemTime() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_SYSTEM_TIME);
         return task;
     }
@@ -211,19 +216,19 @@ public class OrderTaskAssembler {
      * @Description 设置UTC0时区时间
      */
     public static OrderTask setSystemTime() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSystemTime();
         return task;
     }
 
     public static OrderTask getButtonResetEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BUTTON_RESET_ENABLE);
         return task;
     }
 
     public static OrderTask setButtonResetEnable(int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setButtonResetEnable(enable);
         return task;
     }
@@ -232,19 +237,19 @@ public class OrderTaskAssembler {
      * @Description 获取电池电量
      */
     public static OrderTask getBattery() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BATTERY_VOLTAGE);
         return task;
     }
 
     public static OrderTask getBatteryPercent() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BATTERY_PERCENT);
         return task;
     }
 
     public static OrderTask getBoardType() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BOARD_TYPE);
         return task;
     }
@@ -253,7 +258,7 @@ public class OrderTaskAssembler {
      * @Description 关机
      */
     public static OrderTask setClose() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_CLOSE);
         return task;
     }
@@ -262,7 +267,7 @@ public class OrderTaskAssembler {
      * @Description 保存为默认值
      */
     public static OrderTask setDefault() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_DEFAULT);
         return task;
     }
@@ -271,86 +276,86 @@ public class OrderTaskAssembler {
      * @Description 恢复出厂设置
      */
     public static OrderTask resetDevice() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_RESET);
         return task;
     }
 
     public static OrderTask setResetBattery() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setResetBattery();
         return task;
     }
 
     public static OrderTask setSinglePressEventClear() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_SINGLE_PRESS_EVENT_CLEAR);
         return task;
     }
 
     public static OrderTask setDoublePressEventClear() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_DOUBLE_PRESS_EVENT_CLEAR);
         return task;
     }
 
     public static OrderTask setLongPressEventClear() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_LONG_PRESS_EVENT_CLEAR);
         return task;
     }
 
     public static OrderTask setSinglePressEventClearSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_SINGLE_PRESS_EVENT_SUB_CLEAR);
         return task;
     }
 
     public static OrderTask setDoublePressEventClearSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_DOUBLE_PRESS_EVENT_SUB_CLEAR);
         return task;
     }
 
     public static OrderTask setLongPressEventClearSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_LONG_PRESS_EVENT_SUB_CLEAR);
         return task;
     }
 
     public static OrderTask setLongConnectionEventClear() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_LONG_CONNECTION_CLEAR);
         return task;
     }
 
     public static OrderTask getFrameType(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getFrameType(slot);
         return task;
     }
 
 
     public static OrderTask setAlarmFrameType(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setAlarmFrameType(slot);
         return task;
     }
 
     public static OrderTask setUidFrameType(@IntRange(from = 0, to = 3) int slot, String namespaceId, String instanceId) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setUidFrameType(slot, namespaceId, instanceId);
         return task;
     }
 
     public static OrderTask setIBeaconFrameType(@IntRange(from = 0, to = 3) int slot, String uuid, int major, int minor) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setIBeaconFrameType(slot, uuid, major, minor);
         return task;
     }
 
     public static OrderTask getSlotParams(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotParams(slot);
         return task;
     }
@@ -361,13 +366,13 @@ public class OrderTaskAssembler {
                                           @IntRange(from = -100, to = 0) int rssi,
                                           @IntRange(from = 20, to = 10000) int interval,
                                           @IntRange(from = -40, to = 4) int txPower) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotParams(slot, enable, rssi, interval, txPower);
         return task;
     }
 
     public static OrderTask getSlotTriggerParams(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotTriggerParams(slot);
         return task;
     }
@@ -378,75 +383,75 @@ public class OrderTaskAssembler {
                                                  @IntRange(from = 20, to = 10000) int interval,
                                                  @IntRange(from = -40, to = 4) int txPower,
                                                  @IntRange(from = 1, to = 65535) int triggerAdvTime) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotTriggerParams(slot, enable, rssi, interval, txPower, triggerAdvTime);
         return task;
     }
 
     public static OrderTask getSlotAdvBeforeTriggerEnable(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotAdvBeforeTriggerEnable(slot);
         return task;
     }
 
     public static OrderTask setSlotAdvBeforeTriggerEnable(@IntRange(from = 0, to = 3) int slot,
                                                           @IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotAdvBeforeTriggerEnable(slot, enable);
         return task;
     }
 
     public static OrderTask getAbnormalInactivityAlarmStaticInterval() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_ABNORMAL_INACTIVITY_ALARM_STATIC_INTERVAL);
         return task;
     }
 
     public static OrderTask setAbnormalInactivityAlarmStaticInterval(@IntRange(from = 1, to = 65535) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setAbnormalInactivityAlarmStaticInterval(interval);
         return task;
     }
 
     public static OrderTask getSlotTriggerAlarmNotifyType(@IntRange(from = 0, to = 4) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotTriggerAlarmNotifyType(slot);
         return task;
     }
 
     public static OrderTask setSlotTriggerAlarmNotifyType(@IntRange(from = 0, to = 3) int slot,
                                                           @IntRange(from = 0, to = 5) int type) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotTriggerAlarmNotifyType(slot, type);
         return task;
     }
 
     public static OrderTask getPowerSavingEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_POWER_SAVING_ENABLE);
         return task;
     }
 
     public static OrderTask setPowerSavingEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setPowerSavingEnable(enable);
         return task;
     }
 
     public static OrderTask getPowerSavingStaticTriggerTime() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_POWER_SAVING_STATIC_TRIGGER_TIME);
         return task;
     }
 
     public static OrderTask setPowerSavingStaticTriggerTime(@IntRange(from = 1, to = 65535) int time) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setPowerSavingStaticTriggerTime(time);
         return task;
     }
 
     public static OrderTask getSlotLEDNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotLEDNotifyAlarmParams(slot);
         return task;
     }
@@ -454,13 +459,13 @@ public class OrderTaskAssembler {
     public static OrderTask setSlotLEDNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot,
                                                         @IntRange(from = 1, to = 6000) int time,
                                                         @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotLEDNotifyAlarmParams(slot, time, interval);
         return task;
     }
 
     public static OrderTask getSlotVibrationNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotVibrationNotifyAlarmParams(slot);
         return task;
     }
@@ -468,13 +473,13 @@ public class OrderTaskAssembler {
     public static OrderTask setSlotVibrationNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot,
                                                               @IntRange(from = 1, to = 6000) int time,
                                                               @IntRange(from = 1, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotVibrationNotifyAlarmParams(slot, time, interval);
         return task;
     }
 
     public static OrderTask getSlotBuzzerNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getSlotBuzzerNotifyAlarmParams(slot);
         return task;
     }
@@ -482,197 +487,199 @@ public class OrderTaskAssembler {
     public static OrderTask setSlotBuzzerNotifyAlarmParams(@IntRange(from = 0, to = 3) int slot,
                                                            @IntRange(from = 1, to = 6000) int time,
                                                            @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setSlotBuzzerNotifyAlarmParams(slot, time, interval);
         return task;
     }
 
     public static OrderTask getRemoteLEDNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_REMOTE_LED_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setRemoteLEDNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                           @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setRemoteLEDNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask getRemoteVibrationNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_REMOTE_VIBRATION_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setRemoteVibrationNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                                 @IntRange(from = 1, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setRemoteVibrationNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask getRemoteBuzzerNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_REMOTE_BUZZER_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setRemoteBuzzerNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                              @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setRemoteBuzzerNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask setDismissAlarm() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setData(ParamsKeyEnum.KEY_DISMISS_ALARM);
         return task;
     }
 
     public static OrderTask setDismissAlarmEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDismissAlarmEnable(enable);
         return task;
     }
+
     public static OrderTask setBtnPowerEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setBtnPowerEnable(enable);
         return task;
     }
 
     public static OrderTask getDismissAlarmEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DISMISS_ALARM_ENABLE);
         return task;
     }
+
     public static OrderTask getBtnPowerEnable() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_BUTTON_POWER_ENABLE);
         return task;
     }
 
     public static OrderTask getDismissLEDNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DISMISS_LED_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setDismissLEDNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                            @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDismissLEDNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask getDismissVibrationNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DISMISS_VIBRATION_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setDismissVibrationNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                                  @IntRange(from = 1, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDismissVibrationNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask getDismissBuzzerNotifyAlarmParams() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DISMISS_BUZZER_NOTIFY_ALARM_PARAMS);
         return task;
     }
 
     public static OrderTask setDismissBuzzerNotifyAlarmParams(@IntRange(from = 1, to = 6000) int time,
                                                               @IntRange(from = 0, to = 100) int interval) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDismissBuzzerNotifyAlarmParams(time, interval);
         return task;
     }
 
     public static OrderTask getDismissAlarmType() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DISMISS_ALARM_TYPE);
         return task;
     }
 
     public static OrderTask setDismissAlarmType(@IntRange(from = 0, to = 5) int type) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDismissAlarmType(type);
         return task;
     }
 
     public static OrderTask getDeviceId() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DEVICE_ID);
         return task;
     }
 
     public static OrderTask setDeviceId(String deviceId) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDeviceId(deviceId);
         return task;
     }
 
     public static OrderTask getDeviceName() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DEVICE_NAME);
         return task;
     }
 
     public static OrderTask setDeviceName(String deviceId) {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.setDeviceName(deviceId);
         return task;
     }
 
     public static OrderTask getSinglePressEventCount() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_SINGLE_PRESS_EVENTS);
         return task;
     }
 
     public static OrderTask getDoublePressEventCount() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DOUBLE_PRESS_EVENTS);
         return task;
     }
 
     public static OrderTask getLongPressEventCount() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_LONG_PRESS_EVENTS);
         return task;
     }
 
     public static OrderTask getSinglePressEventCountSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_SINGLE_PRESS_SUB_EVENTS);
         return task;
     }
 
     public static OrderTask getDoublePressEventCountSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_DOUBLE_PRESS_SUB_EVENTS);
         return task;
     }
 
     public static OrderTask getLongPressEventCountSub() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_LONG_PRESS_SUB_EVENTS);
         return task;
     }
 
     public static OrderTask getSensorType() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_SENSOR_TYPE);
         return task;
     }
 
     public static OrderTask getFirmwareType() {
-        ParamsTask task = new ParamsTask();
+        ParamsTask task = new ParamsTask(dataAddress);
         task.getData(ParamsKeyEnum.KEY_FIRMWARE_TYPE);
         return task;
     }

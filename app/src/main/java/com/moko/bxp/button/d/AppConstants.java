@@ -14,6 +14,10 @@ public class AppConstants {
 
     public static final String SP_KEY_DEVICE_ADDRESS = "sp_key_device_address";
     public static final String SP_KEY_SAVED_PASSWORD = "SP_KEY_SAVED_PASSWORD";
+    public static final String SP_KEY_DEVICE_TYPE = "SP_KEY_DEVICE_TYPE";
+    public static final String SP_KEY_SOFTWARE_TYPE = "SP_KEY_SOFTWARE_TYPE";
+    public static final String SP_KEY_BOARD_TYPE = "SP_KEY_BOARD_TYPE";
+
     // extra_key
     // 设备列表
     public static final String EXTRA_KEY_RESPONSE_ORDER_TYPE = "EXTRA_KEY_RESPONSE_ORDER_TYPE";

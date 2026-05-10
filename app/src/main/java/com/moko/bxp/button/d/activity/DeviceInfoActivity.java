@@ -33,6 +33,7 @@ import com.moko.bxp.button.d.fragment.DeviceFragment;
 import com.moko.bxp.button.d.fragment.SettingFragment;
 import com.moko.bxp.button.d.service.DfuServiceBtn;
 import com.moko.bxp.button.d.utils.FileUtils;
+import com.moko.bxp.button.d.utils.SPUtiles;
 import com.moko.bxp.button.d.utils.ToastUtils;
 import com.moko.lib.bxpui.dialog.AlertMessageDialog;
 import com.moko.lib.bxpui.dialog.LoadingMessageDialog;
@@ -53,6 +54,7 @@ import java.util.regex.Matcher;
 
 import androidx.annotation.IdRes;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import no.nordicsemi.android.dfu.DfuProgressListener;
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
@@ -85,9 +87,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         super.onCreate(savedInstanceState);
         mBind = DActivityDeviceInfoBinding.inflate(getLayoutInflater());
         setContentView(mBind.getRoot());
-        mFirmwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, 0);
-        mSoftwareType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, 0);
-        mBoardType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_BOARD_TYPE, 1);
+        mDeviceMac = getIntent().getStringExtra(AppConstants.EXTRA_KEY_DEVICE_MAC);
+        mFirmwareType = SPUtiles.getIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE+ "_" + mDeviceMac, 0);
+        mSoftwareType =  SPUtiles.getIntValue(this, AppConstants.SP_KEY_SOFTWARE_TYPE+ "_" + mDeviceMac, 0);
+        mBoardType =  SPUtiles.getIntValue(this, AppConstants.SP_KEY_BOARD_TYPE+ "_" + mDeviceMac, 1);
         fragmentManager = getFragmentManager();
         initFragment();
         mBind.rgOptions.setOnCheckedChangeListener(this);
@@ -111,7 +114,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
 //        getAlarmSwitch();
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         EventBus.getDefault().cancelEventDelivery(event);
         final String action = event.getAction();
@@ -133,7 +136,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                         dialog.setCancelGone();
                         dialog.setOnAlertConfirmListener(() -> {
                             setResult(RESULT_OK);
-                            finish();
+                            back();
                         });
                         dialog.show(getSupportFragmentManager());
                     }
@@ -144,7 +147,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         EventBus.getDefault().cancelEventDelivery(event);
         final String action = event.getAction();
@@ -167,7 +170,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                 dialog.setConfirm(R.string.ok);
                                 dialog.setOnAlertConfirmListener(() -> {
                                     setResult(RESULT_OK);
-                                    finish();
+                                    back();
                                 });
                                 dialog.show(getSupportFragmentManager());
                             } else if (mDisconnectType == 3) {
@@ -177,7 +180,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                 dialog.setConfirm(R.string.ok);
                                 dialog.setOnAlertConfirmListener(() -> {
                                     setResult(RESULT_OK);
-                                    finish();
+                                    back();
                                 });
                                 dialog.show(getSupportFragmentManager());
                             } else if (mDisconnectType == 4) {
@@ -188,7 +191,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                 dialog.setCancelGone();
                                 dialog.setOnAlertConfirmListener(() -> {
                                     setResult(RESULT_OK);
-                                    finish();
+                                    back();
                                 });
                                 dialog.show(getSupportFragmentManager());
                             }
@@ -338,9 +341,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                                     alarmNewFragment.setAbnormalInactivityModeSwitch(slotEnable);
                                                     if (!mIsOpenClickEventNotify) {
                                                         mIsOpenClickEventNotify = true;
-                                                        DMokoSupport.getInstance().enableClickEventNotify();
+                                                        DMokoSupport.getInstance().enableClickEventNotify(OrderTaskAssembler.dataAddress);
                                                         if (mBoardType == 3)
-                                                            DMokoSupport.getInstance().enableClickSubEventNotify();
+                                                            DMokoSupport.getInstance().enableClickSubEventNotify(OrderTaskAssembler.dataAddress);
                                                     }
                                                 }
                                             } else {
@@ -533,7 +536,8 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             // 注销广播
             unregisterReceiver(mReceiver);
         }
-        EventBus.getDefault().unregister(this);
+        if (EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 
     private LoadingMessageDialog mLoadingMessageDialog;
@@ -550,8 +554,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     private void back() {
-        DMokoSupport.getInstance().disConnectBle();
+        EventBus.getDefault().unregister(this);
         mIsClose = false;
+        finish();
     }
 
     @Override
@@ -827,7 +832,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         dialog.setOnAlertConfirmListener(() -> {
             isUpgrading = false;
             setResult(RESULT_OK);
-            finish();
+            back();
         });
         dialog.show(getSupportFragmentManager());
     }
@@ -856,11 +861,12 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             mDeviceConnectCount++;
             if (mDeviceConnectCount > 3) {
                 ToastUtils.showToast(DeviceInfoActivity.this, "Error:DFU Failed");
-                DMokoSupport.getInstance().disConnectBle();
+//                DMokoSupport.getInstance().disConnectBle(mDeviceMac);
                 final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(DeviceInfoActivity.this);
                 final Intent abortAction = new Intent(DfuServiceBtn.BROADCAST_ACTION);
                 abortAction.putExtra(DfuServiceBtn.EXTRA_ACTION, DfuServiceBtn.ACTION_ABORT);
                 manager.sendBroadcast(abortAction);
+                back();
             }
         }
 

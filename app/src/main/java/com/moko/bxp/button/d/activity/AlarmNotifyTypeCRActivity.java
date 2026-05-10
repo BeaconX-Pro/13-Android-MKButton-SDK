@@ -84,7 +84,7 @@ public class AlarmNotifyTypeCRActivity extends BaseActivity {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -95,7 +95,7 @@ public class AlarmNotifyTypeCRActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         EventBus.getDefault().cancelEventDelivery(event);
         final String action = event.getAction();

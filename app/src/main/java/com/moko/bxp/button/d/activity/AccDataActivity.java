@@ -81,7 +81,7 @@ public class AccDataActivity extends BaseActivity{
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(new Runnable() {
@@ -98,7 +98,7 @@ public class AccDataActivity extends BaseActivity{
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         EventBus.getDefault().cancelEventDelivery(event);
         final String action = event.getAction();
@@ -235,7 +235,7 @@ public class AccDataActivity extends BaseActivity{
 
     private void back() {
         // 关闭通知
-        DMokoSupport.getInstance().disableAccNotify();
+        DMokoSupport.getInstance().disableAccNotify(OrderTaskAssembler.dataAddress);
         finish();
     }
 
@@ -273,12 +273,12 @@ public class AccDataActivity extends BaseActivity{
             return;
         if (!isSync) {
             isSync = true;
-            DMokoSupport.getInstance().enableAccNotify();
+            DMokoSupport.getInstance().enableAccNotify(OrderTaskAssembler.dataAddress);
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
             mBind.ivSync.startAnimation(animation);
             mBind.tvSync.setText("Stop");
         } else {
-            DMokoSupport.getInstance().disableAccNotify();
+            DMokoSupport.getInstance().disableAccNotify(OrderTaskAssembler.dataAddress);
             isSync = false;
             mBind.ivSync.clearAnimation();
             mBind.tvSync.setText("Sync");

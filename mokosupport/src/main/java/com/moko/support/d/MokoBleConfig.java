@@ -78,12 +78,12 @@ final class MokoBleConfig extends MokoBleManager {
     }
 
     @Override
-    public void write(BluetoothGattCharacteristic characteristic, byte[] value) {
+    public void write(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value) {
     }
 
     @Override
-    public void read(BluetoothGattCharacteristic characteristic, byte[] value) {
-        mMokoResponseCallback.onCharacteristicRead(characteristic, value);
+    public void read(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value) {
+        mMokoResponseCallback.onCharacteristicRead(gatt.getDevice(), characteristic, value);
     }
 
     @Override
@@ -122,7 +122,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(paramsCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, paramsCharacteristic, value);
         });
         enableNotifications(paramsCharacteristic).done(device -> mMokoResponseCallback.onServicesDiscovered(gatt)).enqueue();
     }
@@ -136,7 +136,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(disconnectCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, disconnectCharacteristic, value);
         });
         enableNotifications(disconnectCharacteristic).enqueue();
     }
@@ -150,7 +150,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(passwordCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, passwordCharacteristic, value);
         });
         enableNotifications(passwordCharacteristic).enqueue();
     }
@@ -164,7 +164,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(singleTriggerCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, singleTriggerCharacteristic, value);
         });
         enableNotifications(singleTriggerCharacteristic).enqueue();
     }
@@ -178,7 +178,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(doubleTriggerCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, doubleTriggerCharacteristic, value);
         });
         enableNotifications(doubleTriggerCharacteristic).enqueue();
     }
@@ -192,7 +192,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(longTriggerCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, longTriggerCharacteristic, value);
         });
         enableNotifications(longTriggerCharacteristic).enqueue();
     }
@@ -206,7 +206,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(accCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, accCharacteristic, value);
         });
         enableNotifications(accCharacteristic).enqueue();
     }
@@ -220,7 +220,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(clickEventCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, clickEventCharacteristic, value);
         });
         enableNotifications(clickEventCharacteristic).enqueue();
     }
@@ -228,12 +228,13 @@ final class MokoBleConfig extends MokoBleManager {
     public void disableClickEventNotify() {
         disableNotifications(clickEventCharacteristic).enqueue();
     }
+
     public void enableClickSubEventNotify() {
         setNotificationCallback(clickSubEventCharacteristic).with((device, data) -> {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(clickSubEventCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, clickSubEventCharacteristic, value);
         });
         enableNotifications(clickSubEventCharacteristic).enqueue();
     }
@@ -247,7 +248,7 @@ final class MokoBleConfig extends MokoBleManager {
             final byte[] value = data.getValue();
             XLog.e("onDataReceived");
             XLog.e("device to app : " + MokoUtils.bytesToHexString(value));
-            mMokoResponseCallback.onCharacteristicChanged(longConnectionCharacteristic, value);
+            mMokoResponseCallback.onCharacteristicChanged(device, longConnectionCharacteristic, value);
         });
         enableNotifications(longConnectionCharacteristic).enqueue();
     }

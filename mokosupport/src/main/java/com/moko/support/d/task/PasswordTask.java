@@ -10,8 +10,8 @@ import androidx.annotation.IntRange;
 public class PasswordTask extends OrderTask {
     public byte[] data;
 
-    public PasswordTask() {
-        super(OrderCHAR.CHAR_PASSWORD, OrderTask.RESPONSE_TYPE_WRITE_NO_RESPONSE);
+    public PasswordTask(String address) {
+        super(OrderCHAR.CHAR_PASSWORD, OrderTask.RESPONSE_TYPE_WRITE_NO_RESPONSE, address);
     }
 
     @Override

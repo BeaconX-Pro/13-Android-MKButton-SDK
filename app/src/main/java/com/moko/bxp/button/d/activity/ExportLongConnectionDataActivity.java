@@ -80,7 +80,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
         EventBus.getDefault().register(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -190,7 +190,7 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
 
     private void back() {
         if (mIsSync) {
-            DMokoSupport.getInstance().disableLongConnectionNotify();
+            DMokoSupport.getInstance().disableLongConnectionNotify(OrderTaskAssembler.dataAddress);
         }
         finish();
     }
@@ -210,13 +210,13 @@ public class ExportLongConnectionDataActivity extends BaseActivity {
             Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
             mBind.ivSync.startAnimation(animation);
             mBind.tvSync.setText("Stop");
-            DMokoSupport.getInstance().enableLongConnectionNotify();
+            DMokoSupport.getInstance().enableLongConnectionNotify(OrderTaskAssembler.dataAddress);
 
         } else {
             mIsSync = false;
             mBind.ivSync.clearAnimation();
             mBind.tvSync.setText("Sync");
-            DMokoSupport.getInstance().disableLongConnectionNotify();
+            DMokoSupport.getInstance().disableLongConnectionNotify(OrderTaskAssembler.dataAddress);
         }
     }
 

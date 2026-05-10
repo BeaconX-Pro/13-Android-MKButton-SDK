@@ -91,6 +91,12 @@
         <activity
             android:name="com.moko.bxp.button.d.activity.DfuActivity"
             android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.moko.bxp.button.d.activity.ConnectedListActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.moko.bxp.button.d.activity.BatchRemoteReminderActivity"
+            android:windowSoftInputMode="adjustPan" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.moko.bxp.button.d.fileprovider"

@@ -18,17 +18,19 @@ import com.moko.support.d.handler.MokoCharacteristicHandler;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class DMokoSupport extends MokoBleLib {
-    private HashMap<OrderCHAR, BluetoothGattCharacteristic> mCharacteristicMap;
+    private Map<String, Map<OrderCHAR, BluetoothGattCharacteristic>> mCharacteristicMap = new LinkedHashMap<>();
 
     private static volatile DMokoSupport INSTANCE;
 
     private Context mContext;
-
-    private MokoBleConfig mBleConfig;
+    private Map<String, MokoBleConfig> mBleConfigMap = new LinkedHashMap<>();
 
     private DMokoSupport() {
         //no instance
@@ -52,45 +54,51 @@ public class DMokoSupport extends MokoBleLib {
 
 
     @Override
-    public MokoBleManager getMokoBleManager() {
-        mBleConfig = new MokoBleConfig(mContext, this);
-        return mBleConfig;
+    public MokoBleManager getMokoBleManager(String address) {
+        MokoBleConfig bleConfig = mBleConfigMap.get(address);
+        if (bleConfig == null) {
+            bleConfig = new MokoBleConfig(mContext, this);
+            mBleConfigMap.put(address, bleConfig);
+        }
+        return bleConfig;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // connect
-
-    ///////////////////////////////////////////////////////////////////////////
+    /// Connect
 
     @Override
     public void onDeviceConnected(BluetoothGatt gatt) {
-        mCharacteristicMap = new MokoCharacteristicHandler().getCharacteristics(gatt);
+        mCharacteristicMap.putIfAbsent(gatt.getDevice().getAddress(), new MokoCharacteristicHandler().getCharacteristics(gatt));
         ConnectStatusEvent connectStatusEvent = new ConnectStatusEvent();
         connectStatusEvent.setAction(MokoConstants.ACTION_DISCOVER_SUCCESS);
+        connectStatusEvent.setBluetoothDevice(gatt.getDevice());
         EventBus.getDefault().post(connectStatusEvent);
     }
 
     @Override
     public void onDeviceDisconnected(BluetoothDevice device) {
+        mBleConfigMap.remove(device.getAddress());
+        mCharacteristicMap.remove(device.getAddress());
         ConnectStatusEvent connectStatusEvent = new ConnectStatusEvent();
         connectStatusEvent.setAction(MokoConstants.ACTION_DISCONNECTED);
+        connectStatusEvent.setBluetoothDevice(device);
         EventBus.getDefault().post(connectStatusEvent);
     }
 
     @Override
-    public BluetoothGattCharacteristic getCharacteristic(Enum orderCHAR) {
-        return mCharacteristicMap.get(orderCHAR);
+    public BluetoothGattCharacteristic getCharacteristic(String address, Enum orderCHAR) {
+        return mCharacteristicMap.get(address).get(orderCHAR);
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // order
+    public ArrayList<String> getConnectedDeviceList() {
+        return new ArrayList<>(mCharacteristicMap.keySet());
+    }
 
-    ///////////////////////////////////////////////////////////////////////////
+    /// OrderTask
 
     @Override
-    public boolean isCHARNull() {
+    public boolean isCHARNull(String address) {
         if (mCharacteristicMap == null || mCharacteristicMap.isEmpty()) {
-            disConnectBle();
+            disConnectBle(address);
             return true;
         }
         return false;
@@ -128,7 +136,7 @@ public class DMokoSupport extends MokoBleLib {
 
 
     @Override
-    public boolean orderNotify(BluetoothGattCharacteristic characteristic, byte[] value) {
+    public boolean orderNotify(BluetoothDevice device, BluetoothGattCharacteristic characteristic, byte[] value) {
         final UUID responseUUID = characteristic.getUuid();
         OrderCHAR orderCHAR = null;
         if (responseUUID.equals(OrderCHAR.CHAR_DISCONNECT.getUuid())) {
@@ -161,6 +169,7 @@ public class DMokoSupport extends MokoBleLib {
         OrderTaskResponse response = new OrderTaskResponse();
         response.orderCHAR = orderCHAR;
         response.responseValue = value;
+        response.address = device.getAddress();
         OrderTaskResponseEvent event = new OrderTaskResponseEvent();
         event.setAction(MokoConstants.ACTION_CURRENT_DATA);
         event.setResponse(response);
@@ -168,73 +177,73 @@ public class DMokoSupport extends MokoBleLib {
         return true;
     }
 
-    public void enableSingleTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableSingleTriggerNotify();
+    public void enableSingleTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableSingleTriggerNotify();
     }
 
-    public void disableSingleTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableSingleTriggerNotify();
+    public void disableSingleTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableSingleTriggerNotify();
     }
 
-    public void enableDoubleTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableDoubleTriggerNotify();
+    public void enableDoubleTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableDoubleTriggerNotify();
     }
 
-    public void disableDoubleTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableDoubleTriggerNotify();
+    public void disableDoubleTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableDoubleTriggerNotify();
     }
 
-    public void enableLongTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableLongTriggerNotify();
+    public void enableLongTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableLongTriggerNotify();
     }
 
-    public void disableLongTriggerNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableLongTriggerNotify();
+    public void disableLongTriggerNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableLongTriggerNotify();
     }
 
-    public void enableAccNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableAccNotify();
+    public void enableAccNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableAccNotify();
     }
 
-    public void disableAccNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableAccNotify();
+    public void disableAccNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableAccNotify();
     }
 
-    public void enableClickEventNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableClickEventNotify();
+    public void enableClickEventNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableClickEventNotify();
     }
 
-    public void disableClickEventNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableClickEventNotify();
+    public void disableClickEventNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableClickEventNotify();
     }
 
-    public void enableLongConnectionNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableLongConnectionNotify();
+    public void enableLongConnectionNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableLongConnectionNotify();
     }
 
-    public void disableLongConnectionNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableLongConnectionNotify();
+    public void disableLongConnectionNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableLongConnectionNotify();
     }
 
-    public void enableClickSubEventNotify() {
-        if (mBleConfig != null)
-            mBleConfig.enableClickSubEventNotify();
+    public void enableClickSubEventNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).enableClickSubEventNotify();
     }
 
-    public void disableClickSubEventNotify() {
-        if (mBleConfig != null)
-            mBleConfig.disableClickSubEventNotify();
+    public void disableClickSubEventNotify(String address) {
+        if (mBleConfigMap.get(address) != null)
+            mBleConfigMap.get(address).disableClickSubEventNotify();
     }
 }

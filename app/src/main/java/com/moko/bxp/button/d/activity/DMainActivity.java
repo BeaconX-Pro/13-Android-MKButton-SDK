@@ -120,7 +120,11 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
         itemDecoration.setDrawable(ContextCompat.getDrawable(this, R.drawable.shape_recycleview_divider));
         mBind.rvDevices.addItemDecoration(itemDecoration);
         mBind.rvDevices.setAdapter(adapter);
-
+        mBind.tvConnectedDevices.setOnClickListener(v -> {
+            if (isWindowLocked()) return;
+            Intent deviceInfoIntent = new Intent(DMainActivity.this, ConnectedListActivity.class);
+            startActivityForResult(deviceInfoIntent, AppConstants.REQUEST_CODE_DEVICE_INFO);
+        });
         mHandler = new Handler(Looper.getMainLooper());
         mokoBleScanner = new MokoBleScanner(this);
         EventBus.getDefault().register(this);
@@ -227,14 +231,15 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                 case CHAR_SOFTWARE_REVISION:
                     String softwareVersion = new String(value).trim();
                     dismissLoadingMessageDialog();
+                    dismissLoadingProgressDialog();
                     Matcher matcher = mPattern.matcher(softwareVersion);
                     if (!matcher.matches()) {
                         showDeviceTypeErrorDialog();
                         return;
                     }
                     mFirmwareType = 0;
-                    Intent i = new Intent(this, DeviceInfoActivity.class);
-                    i.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
+                    Intent i = new Intent(this, ConnectedListActivity.class);
+                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
                     startActivityForResult(i, AppConstants.REQUEST_CODE_DEVICE_INFO);
                     break;
                 case CHAR_PARAMS:
@@ -273,18 +278,18 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     if (mFirmwareType == 2 && softwareVersionStr.contains("-D")) {
                                         DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
                                     } else {
-                                        Intent intent = new Intent(this, DeviceInfoActivity.class);
-                                        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
-                                        intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
+                                        Intent intent = new Intent(this, ConnectedListActivity.class);
+                                        SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
+                                        SPUtiles.setIntValue(this, AppConstants.SP_KEY_SOFTWARE_TYPE + "_" + response.address, mSoftwareType);
                                         startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
                                     }
                                     break;
                                 case KEY_BOARD_TYPE:
                                     mBoardType = value[4];
-                                    Intent intent = new Intent(this, DeviceInfoActivity.class);
-                                    intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_TYPE, mFirmwareType);
-                                    intent.putExtra(AppConstants.EXTRA_KEY_SOFTWARE_TYPE, mSoftwareType);
-                                    intent.putExtra(AppConstants.EXTRA_KEY_BOARD_TYPE, mBoardType);
+                                    Intent intent = new Intent(this, ConnectedListActivity.class);
+                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
+                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_SOFTWARE_TYPE + "_" + response.address, mSoftwareType);
+                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_BOARD_TYPE + "_" + response.address, mBoardType);
                                     startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
                                     break;
                             }
@@ -317,7 +322,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                         dismissLoadingMessageDialog();
                                         isPasswordError = true;
                                         ToastUtils.showToast(this, "Password incorrect！");
-                                        DMokoSupport.getInstance().disConnectBle();
+                                        DMokoSupport.getInstance().disConnectBle(response.address);
                                     }
                                 }
                                 break;
@@ -344,7 +349,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
         dialog.setMessage("The software version selected is incorrect.Please back to the product list options and select again.");
         dialog.setCancelGone();
         dialog.setConfirm("Confirm");
-        dialog.setOnAlertConfirmListener(() -> DMokoSupport.getInstance().disConnectBle());
+        dialog.setOnAlertConfirmListener(() -> DMokoSupport.getInstance().disConnectBle(OrderTaskAssembler.dataAddress));
         dialog.show(getSupportFragmentManager());
     }
 
@@ -529,6 +534,11 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
             DMokoSupport.getInstance().enableBluetooth();
             return;
         }
+        int size = DMokoSupport.getInstance().getConnectedDeviceList().size();
+        if (size == 8) {
+            ToastUtils.showToast(this, "Up to 8 devices can be connected.");
+            return;
+        }
         final AdvInfo advInfo = (AdvInfo) adapter.getItem(position);
         if (advInfo != null && !isFinishing()) {
             if (animation != null) {
@@ -537,6 +547,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
             }
             mSelectedDeviceMac = advInfo.mac;
             isOTA = advInfo.isOTA;
+            OrderTaskAssembler.setAddress(advInfo.mac);
 //            if (advInfo.verifyEnable == 1) {
 //                // 开启验证
 //                showPasswordDialog();
@@ -568,7 +579,7 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
             @Override
             public void onDismiss() {
                 if (DMokoSupport.getInstance().isConnDevice(mSelectedDeviceMac)) {
-                    DMokoSupport.getInstance().disConnectBle();
+                    DMokoSupport.getInstance().disConnectBle(mSelectedDeviceMac);
                     return;
                 }
                 startScan();
