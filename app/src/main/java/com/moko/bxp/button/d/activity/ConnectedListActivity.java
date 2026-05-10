@@ -55,6 +55,10 @@ public class ConnectedListActivity extends BaseActivity implements BaseQuickAdap
         mBind.rvDevices.setAdapter(adapter);
         mBind.tvBatchRemoteRemind.setOnClickListener(v -> {
             if (isWindowLocked()) return;
+            if (mConnectedList.isEmpty()) {
+                ToastUtils.showToast(this, "Cannot be empty!");
+                return;
+            }
             Intent deviceInfoIntent = new Intent(ConnectedListActivity.this, BatchRemoteReminderActivity.class);
             startLauncher.launch(deviceInfoIntent);
         });
