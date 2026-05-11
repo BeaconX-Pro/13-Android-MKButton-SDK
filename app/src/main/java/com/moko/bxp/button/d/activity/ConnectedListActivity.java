@@ -11,23 +11,31 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.elvishew.xlog.XLog;
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
+import com.moko.ble.lib.event.OrderTaskResponseEvent;
+import com.moko.ble.lib.task.OrderTaskResponse;
+import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.bxp.button.d.AppConstants;
 import com.moko.bxp.button.d.R;
 import com.moko.bxp.button.d.adapter.ConnectedListAdapter;
 import com.moko.bxp.button.d.databinding.DActivityConnectedListBinding;
 import com.moko.bxp.button.d.utils.SPUtiles;
+import com.moko.lib.bxpui.dialog.AlertMessageDialog;
 import com.moko.lib.bxpui.dialog.LoadingDialog;
 import com.moko.lib.bxpui.utils.ToastUtils;
 import com.moko.support.d.DMokoSupport;
 import com.moko.support.d.OrderTaskAssembler;
+import com.moko.support.d.entity.OrderCHAR;
+import com.moko.support.d.entity.ParamsKeyEnum;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class ConnectedListActivity extends BaseActivity implements BaseQuickAdapter.OnItemClickListener
@@ -80,6 +88,54 @@ public class ConnectedListActivity extends BaseActivity implements BaseQuickAdap
                 ToastUtils.showToast(this, String.format("%s has disconnected", address));
                 mConnectedList = DMokoSupport.getInstance().getConnectedDeviceList();
                 adapter.replaceData(mConnectedList);
+                if (mConnectedList.isEmpty()) mBind.tvAlarmEvent.setText("No alarm event");
+            }
+        });
+    }
+
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
+    public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
+        final String action = event.getAction();
+        runOnUiThread(() -> {
+            if (MokoConstants.ACTION_CURRENT_DATA.equals(action)) {
+                OrderTaskResponse response = event.getResponse();
+                OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
+                int responseType = response.responseType;
+                String address = response.address;
+                int boardType = SPUtiles.getIntValue(this, AppConstants.SP_KEY_BOARD_TYPE + "_" + address, 0);
+                byte[] value = response.responseValue;
+                switch (orderCHAR) {
+                    case CHAR_CLICK_EVENT:
+                        if (value.length == 5) {
+                            int header = value[0] & 0xFF;// 0xEB
+                            int flag = value[1] & 0xFF;// read or write
+                            int cmd = value[2] & 0xFF;
+                            int length = value[3] & 0xFF;
+                            if (header != 0xEB || flag != 0x02 || cmd != 0x06 || length != 0x01)
+                                return;
+                            int count = value[4] & 0xFF;
+                            if (count == 0) return;
+                            if (boardType == 3)
+                                mBind.tvAlarmEvent.setText(String.format("%s pressed main button %d times", address, count));
+                            else {
+                                mBind.tvAlarmEvent.setText(String.format("%s pressed button %d times", address, count));
+                            }
+                        }
+                        break;
+                    case CHAR_CLICK_SUB_EVENT:
+                        if (value.length == 5) {
+                            int header = value[0] & 0xFF;// 0xEB
+                            int flag = value[1] & 0xFF;// read or write
+                            int cmd = value[2] & 0xFF;
+                            int length = value[3] & 0xFF;
+                            if (header != 0xEB || flag != 0x02 || cmd != 0x08 || length != 0x01)
+                                return;
+                            int count = value[4] & 0xFF;
+                            if (count == 0) return;
+                            mBind.tvAlarmEvent.setText(String.format("%s pressed sub button %d times", address, count));
+                        }
+                        break;
+                }
             }
         });
     }

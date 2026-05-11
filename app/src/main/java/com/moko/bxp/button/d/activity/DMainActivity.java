@@ -275,8 +275,13 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     }
                                     if (softwareVersionStr.contains("CR"))
                                         mSoftwareType = 1;
+                                    if (mFirmwareType >= 1) {
+                                        DMokoSupport.getInstance().enableClickEventNotify(response.address);
+                                    }
                                     if (mFirmwareType == 2 && softwareVersionStr.contains("-D")) {
-                                        DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
+                                        mHandler.postDelayed(() -> {
+                                            DMokoSupport.getInstance().sendOrder(OrderTaskAssembler.getBoardType());
+                                        }, 500);
                                     } else {
                                         Intent intent = new Intent(this, ConnectedListActivity.class);
                                         SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
@@ -286,11 +291,15 @@ public class DMainActivity extends BaseActivity implements MokoScanDeviceCallbac
                                     break;
                                 case KEY_BOARD_TYPE:
                                     mBoardType = value[4];
-                                    Intent intent = new Intent(this, ConnectedListActivity.class);
-                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
-                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_SOFTWARE_TYPE + "_" + response.address, mSoftwareType);
-                                    SPUtiles.setIntValue(this, AppConstants.SP_KEY_BOARD_TYPE + "_" + response.address, mBoardType);
-                                    startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
+                                    if (mBoardType == 3)
+                                        DMokoSupport.getInstance().enableClickSubEventNotify(response.address);
+                                    mHandler.postDelayed(() -> {
+                                        Intent intent = new Intent(this, ConnectedListActivity.class);
+                                        SPUtiles.setIntValue(this, AppConstants.SP_KEY_DEVICE_TYPE + "_" + response.address, mFirmwareType);
+                                        SPUtiles.setIntValue(this, AppConstants.SP_KEY_SOFTWARE_TYPE + "_" + response.address, mSoftwareType);
+                                        SPUtiles.setIntValue(this, AppConstants.SP_KEY_BOARD_TYPE + "_" + response.address, mBoardType);
+                                        startActivityForResult(intent, AppConstants.REQUEST_CODE_DEVICE_INFO);
+                                    }, 500);
                                     break;
                             }
                         }
