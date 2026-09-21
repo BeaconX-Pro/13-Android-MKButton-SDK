@@ -12,7 +12,7 @@ Cross-platform reference (same protocol): [Flutter-MKButton-SDK](https://github.
 |------|-------------|
 | Android Studio | 3.6+ (8.x recommended) |
 | minSdk | 28 |
-| compileSdk | 35 |
+| compileSdk | 36 |
 | Device | Physical device required (emulators do not support BLE) |
 
 ---
@@ -548,9 +548,9 @@ Scan page (DMainActivity)
 
 ## Changelog
 
-| Date | Version | Notes |
-|------|---------|-------|
-| 2020.01.18 | mokosupport 1.0 | Initial release |
+| Date | Version | Notes                                                            |
+|------|---------|------------------------------------------------------------------|
+| 2020.01.18 | mokosupport 1.0 | Initial release                                                  |
 | 2021.03.11 | mokosupport 2.0 | Restructure SDK; support Android API 29; androidx; optimize docs |
-| 2021.11.30 | mokosupport 3.0 | Change SDK package name; support light sensor data |
-| — | mokosupport 4.0 | compileSdk 35, minSdk 28; |
+| 2021.11.30 | mokosupport 3.0 | Change SDK package name; support light sensor data               |
+| — | mokosupport 4.0 | compileSdk 36, minSdk 28;                                        |

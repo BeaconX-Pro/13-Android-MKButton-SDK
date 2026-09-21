@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -68,12 +67,8 @@ public class DfuActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            back();
-            return false;
-        }
-        return super.onKeyDown(keyCode, event);
+    public void onBackPressed() {
+        back();
     }
 
     public void chooseFirmwareFile() {
